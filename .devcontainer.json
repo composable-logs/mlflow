@@ -1,0 +1,15 @@
+// dev-container setup for VS Code, see
+//
+//   https://code.visualstudio.com/docs/remote/containers
+//
+// First run "docker build --tag static-mlflow-dev-image ."
+//
+{
+    "name": "static-mlflow DEV",
+    "dockerComposeFile": [
+      ".devcontainer-docker-compose.yml"
+    ],
+    "extensions": [],
+    "service": "static-mlflow-dev-image",
+    "workspaceFolder": "/front-dev",
+}

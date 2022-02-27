@@ -1,56 +1,172 @@
 const LIST_EXPERIMENTS_API_STATIC_RESPONSE = {
-    experiments: [
-      {
-        experiment_id: '0',
-        name: 'Experiment #0',
-        artifact_location: './mlruns/0',
-        lifecycle_stage: 'active',
-        tags: [
-          {
-            key: 'mlflow.note.content',
-            value: 'Description shown when opening experiment page. #0',
+  experiments: [{
+      experiment_id: '0',
+      name: 'Experiment #0',
+      artifact_location: './mlruns/0',
+      lifecycle_stage: 'active',
+      tags: [{
+        key: 'mlflow.note.content',
+        value: 'Description shown when opening experiment page. #0',
+      }, ],
+    },
+    {
+      experiment_id: '1',
+      name: 'My experiment #1',
+      artifact_location: './mlruns/1',
+      lifecycle_stage: 'active',
+      tags: [{
+        key: 'mlflow.note.content',
+        value: 'Description shown when opening experiment page. #1',
+      }, ],
+    },
+    {
+      experiment_id: '2',
+      name: 'Last experiment #2',
+      artifact_location: './mlruns/2',
+      lifecycle_stage: 'active',
+    },
+  ]
+};
+
+
+const ALL_RUNS = {
+  runs: [{
+      info: {
+        run_uuid: "00000000000000000000000000000000",
+        experiment_id: "0",
+        user_id: "root",
+        status: "FINISHED",
+        start_time: 1645952322527,
+        end_time: 1645952322545,
+        artifact_uri: "/repo-root/backend/artefacts/0/00000000000000000000000000000000/artifacts",
+        lifecycle_stage: "active",
+        run_id: "00000000000000000000000000000000"
+      },
+      data: {
+        tags: [{
+            key: "mlflow.user",
+            value: "root"
           },
-        ],
-      },
-      {
-        experiment_id: '1',
-        name: 'My experiment #1',
-        artifact_location: './mlruns/1',
-        lifecycle_stage: 'active',
-        tags: [
           {
-            key: 'mlflow.note.content',
-            value: 'Description shown when opening experiment page. #1',
+            key: "mlflow.source.name",
+            value: "/path/to/my/main-file.py"
           },
-        ],
+          {
+            key: "mlflow.source.type",
+            value: "LOCAL"
+          },
+          {
+            key: "mlflow.source.git.commit",
+            value: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            key: "mlflow.runName",
+            value: "my-run-name"
+          },
+          {
+            key: "foo",
+            value: "bar"
+          },
+          {
+            key: "mlflow.note.content",
+            value: "this is a run description"
+          }
+        ]
+      }
+    },
+    {
+      info: {
+        run_uuid: "00000000000000000000000000000111",
+        experiment_id: "0",
+        user_id: "root",
+        status: "FINISHED",
+        start_time: 1645952322527,
+        end_time: 1645952322545,
+        artifact_uri: "/repo-root/backend/artefacts/0/00000000000000000000000000000111/artifacts",
+        lifecycle_stage: "active",
+        run_id: "00000000000000000000000000000111"
       },
-      {
-        experiment_id: '2',
-        name: 'runs-but-no-metrics-params',
-        artifact_location: './mlruns/2',
-        lifecycle_stage: 'active',
-      },
-    ],
-  };
+      data: {
+        tags: [{
+            key: "mlflow.user",
+            value: "root"
+          },
+          {
+            key: "mlflow.source.name",
+            value: "/path/to/my/source-file.py"
+          },
+          {
+            key: "mlflow.source.type",
+            value: "LOCAL"
+          },
+          {
+            key: "mlflow.source.git.commit",
+            value: "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa"
+          },
+          {
+            key: "mlflow.parentRunId",
+            value: "00000000000000000000000000000000"
+          },
+          {
+            key: "mlflow.runName",
+            value: "my-run-name"
+          },
+          {
+            key: "foo",
+            value: "bar"
+          },
+          {
+            key: "mlflow.note.content",
+            value: "this is a run description"
+          }
+        ]
+      }
+    }
+  ]
+};
+
+const one = (xs) => {
+  if (xs.length === 1) {
+    return xs[0];
+  } else {
+    throw new Error('Expected one result; found ${xs.length}')
+  }
+};
 
 export class StaticMlflowService {
-  static listExperiments(_) {
+  static listExperiments(dummy_arg) {
     return new Promise((resolve, reject) => resolve(LIST_EXPERIMENTS_API_STATIC_RESPONSE));
   };
 
-  static getExperiment({ experiment_id }) {
+  static getExperiment({
+    experiment_id
+  }) {
     return new Promise((resolve, error) => {
-      const results = (
+      resolve(
         LIST_EXPERIMENTS_API_STATIC_RESPONSE
-          .experiments
-          .filter((entry) => entry.experiment_id === experiment_id)
-        );
+        .experiments
+        .filter((entry) => entry.experiment_id === experiment_id))
+    }).then(xs => ({
+      experiment: one(xs)
+    }))
+  }
 
-      if (results.length === 1) {
-        resolve({experiment: results[0]});
-      } else {
-        error(new Error('No (unique) data found for experiment {experimentId}'));
-      }
-    });
+  static getRun({
+    run_id
+  }) {
+    return new Promise((resolve, error) => {
+      resolve(
+        ALL_RUNS.runs
+        .filter((entry) => entry.info.run_id === run_id))
+    }).then(xs => ({
+      run: one(xs)
+    }))
+  }
+
+  static listArtifacts({
+    run_uuid,
+    path
+  }) {
+    return new Promise((resolve, error) => resolve([]));
   }
 }

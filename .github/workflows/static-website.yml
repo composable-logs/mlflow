@@ -1,0 +1,27 @@
+name: "Generate static ML Flow website"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - static_mlflow
+
+  workflow_dispatch:
+
+permissions:
+  contents: "none"  # no token needed for public repo
+
+jobs:
+  build-static-website:
+    runs-on: [ubuntu-20.04]
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: false
+
+      - name: "check repo content"
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+            ls -la .

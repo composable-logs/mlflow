@@ -78,3 +78,18 @@ build-static-ui:
 	# add requires "npm install"
 	rm -rf build
 	HOST_STATIC_SITE=true npm run build
+
+docker-build-static-ui:
+	# Docker:ized version of "docker-build-static-ui"-task.
+	# This must be executed in the same directory as this makefile.
+	docker run -t \
+	    --rm \
+	    --volume $$(pwd):/front-root \
+	    node:14.19.0-buster-slim \
+	        bash -c "( \
+	            apt-get update -y; \
+	            apt-get install -y make; \
+	            cd /front-root/; \
+	            npm install; \
+	            make build-static-ui \
+	    )"

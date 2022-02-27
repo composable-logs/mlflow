@@ -1,14 +1,22 @@
 import { MlflowService } from './sdk/MlflowService';
+import { StaticMlflowService } from './static-data/StaticMlflowService';
 import { getUUID, wrapDeferred } from '../common/utils/ActionUtils';
 import { ErrorCodes } from '../common/constants';
 
 export const SEARCH_MAX_RESULTS = 100;
 
+export const getApiData = (methodName, arg) => {
+  return (process.env.HOST_STATIC_SITE
+    ? StaticMlflowService[methodName](arg)
+    : wrapDeferred(MlflowService[methodName], arg)
+  );
+};
+
 export const LIST_EXPERIMENTS_API = 'LIST_EXPERIMENTS_API';
 export const listExperimentsApi = (id = getUUID()) => {
   return {
     type: LIST_EXPERIMENTS_API,
-    payload: wrapDeferred(MlflowService.listExperiments, {}),
+    payload: getApiData("listExperiments", {}),
     meta: { id: id },
   };
 };
@@ -17,7 +25,7 @@ export const GET_EXPERIMENT_API = 'GET_EXPERIMENT_API';
 export const getExperimentApi = (experimentId, id = getUUID()) => {
   return {
     type: GET_EXPERIMENT_API,
-    payload: wrapDeferred(MlflowService.getExperiment, { experiment_id: experimentId }),
+    payload: getApiData("getExperiment", { experiment_id: experimentId }),
     meta: { id: id },
   };
 };

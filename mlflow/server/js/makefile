@@ -1,11 +1,16 @@
 # The below commands can be run inside image build with ML Flow repo root Dockerfile
 
 start-backend:
-
+	# clear any old experiments/artefacts
 	rm -rf /repo-root/mlflow/mlruns
+
 	(\
 	    cd /repo-root/; \
+	    rm -rf /repo-root/backend; \
+		mkdir -p /repo-root/backend/artefacts; \
 	    mlflow server \
+	        --backend-store-uri sqlite:////repo-root/backend/sqlite.db \
+	        --default-artifact-root /repo-root/backend/artefacts/ \
 	        --host 0.0.0.0 \
 	        --port 5000 \
 	        --gunicorn-opts '--log-level debug' \
@@ -29,11 +34,13 @@ watch-ui:
 	# PORT
 	#
 	# --- Front end customization ---
-	# HIDE_HEADER=true/false
+	# HIDE_HEADER
 	#      Show top header with logo and Github link?
+	#      Note, header hidden if flag is defined. Eg.,
+	#      "HIDE_HEADER=false" will hide header.
 	#
 	# HIDE_EXPERIMENT_LIST
-	#      Seems unstable. Setting to True leads to "No Experiments Exist"
+	#      Seems unstable? Setting leads to "No Experiments Exist"
 	#
 	# SHOW_GDPR_PURGING_MESSAGES
 	#      Display comment when deleting experiments
@@ -45,10 +52,13 @@ watch-ui:
 	# --- Not used (?) ---
 	# SHOULD_REDIRECT_IFRAME
 	#
+	# --- Static version of ML Flow ---
+	# HOST_STATIC_SITE
+	#    set to "true" for hosting static (read only) version of ML Flow
 	# -----------------------------
 	(\
 	    PORT=3001 \
-	    HIDE_HEADER=false \
+	    HOST_STATIC_SITE=true \
 	    npm start \
 	)
 
@@ -58,3 +68,7 @@ watch-ui:
 	# VS Code if running a dev-container setup.
 	#apt install -y lsof
 	#kill -9 $(lsof -i:3001 -t)
+
+start-sqlite-web-ui:
+	pip3 install sqlite-web==0.4.0
+	sqlite_web --port 5012 /repo-root/backend/sqlite.db

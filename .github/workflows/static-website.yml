@@ -24,4 +24,5 @@ jobs:
         shell: bash
         working-directory: ${{ github.workspace }}
         run: |
-            ls -la .
+          cd mlflow/server/js
+          make docker-build-static-ui

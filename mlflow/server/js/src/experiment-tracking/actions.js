@@ -170,6 +170,7 @@ export const searchRunsPayload = ({
     page_token: pageToken,
   };
 
+  return getApiData("searchRuns", args).then((res) => (shouldFetchParents ? fetchMissingParents(res) : res));
 
   return wrapDeferred(MlflowService.searchRuns, args).then((res) => (shouldFetchParents ? fetchMissingParents(res) : res));
 };

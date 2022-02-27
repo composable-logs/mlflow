@@ -52,9 +52,13 @@ watch-ui:
 	# --- Not used (?) ---
 	# SHOULD_REDIRECT_IFRAME
 	#
+	# --- Static version of ML Flow ---
+	# HOST_STATIC_SITE
+	#    set to "true" for hosting static (read only) version of ML Flow
 	# -----------------------------
 	(\
 	    PORT=3001 \
+	    HOST_STATIC_SITE=true \
 	    npm start \
 	)
 

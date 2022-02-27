@@ -72,3 +72,9 @@ watch-ui:
 start-sqlite-web-ui:
 	pip3 install sqlite-web==0.4.0
 	sqlite_web --port 5012 /repo-root/backend/sqlite.db
+
+build-static-ui:
+	# Node.js v14.19.0 depedency, see repo root Docker file
+	# add requires "npm install"
+	rm -rf build
+	HOST_STATIC_SITE=true npm run build

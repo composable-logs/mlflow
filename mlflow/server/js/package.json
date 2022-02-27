@@ -98,7 +98,7 @@
     "extract-i18n:base": "node scripts/extract-i18n.js",
     "extract-i18n": "npm run extract-i18n:base"
   },
-  "homepage": "static-files",
+  "homepage": ".",
   "jest": {
     "collectCoverageFrom": [
       "src/**/*.{js,jsx}",

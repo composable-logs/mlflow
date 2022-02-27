@@ -72,3 +72,24 @@ watch-ui:
 start-sqlite-web-ui:
 	pip3 install sqlite-web==0.4.0
 	sqlite_web --port 5012 /repo-root/backend/sqlite.db
+
+build-static-ui:
+	# Node.js v14.19.0 depedency, see repo root Docker file
+	# add requires "npm install"
+	rm -rf build
+	HOST_STATIC_SITE=true npm run build
+
+docker-build-static-ui:
+	# Docker:ized version of "docker-build-static-ui"-task.
+	# This must be executed in the same directory as this makefile.
+	docker run -t \
+	    --rm \
+	    --volume $$(pwd):/front-root \
+	    node:14.19.0-buster-slim \
+	        bash -c "( \
+	            apt-get update -y; \
+	            apt-get install -y make; \
+	            cd /front-root/; \
+	            npm install; \
+	            make build-static-ui \
+	    )"

@@ -171,8 +171,6 @@ export const searchRunsPayload = ({
   };
 
   return getApiData("searchRuns", args).then((res) => (shouldFetchParents ? fetchMissingParents(res) : res));
-
-  return wrapDeferred(MlflowService.searchRuns, args).then((res) => (shouldFetchParents ? fetchMissingParents(res) : res));
 };
 
 export const SEARCH_RUNS_API = 'SEARCH_RUNS_API';

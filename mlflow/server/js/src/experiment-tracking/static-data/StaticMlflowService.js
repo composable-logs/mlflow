@@ -8,7 +8,7 @@ const one = (xs) => {
   if (xs.length === 1) {
     return xs[0];
   } else {
-    throw new Error('Expected one result; found ${xs.length}')
+    throw new Error("Expected one result; found ${xs.length}");
   }
 };
 

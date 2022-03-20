@@ -1,4 +1,5 @@
-# The below commands can be run inside image build with ML Flow repo root Dockerfile
+# --- dev related tasks can be run inside image build with ML Flow
+# --- repo root Dockerfile + VS Code dev container setup
 
 start-backend:
 	# clear any old experiments/artefacts
@@ -70,26 +71,33 @@ watch-ui:
 	#kill -9 $(lsof -i:3001 -t)
 
 start-sqlite-web-ui:
+	# start web ui for inspecting ML Flow backend database schema and data
 	pip3 install sqlite-web==0.4.0
 	sqlite_web --port 5012 /repo-root/backend/sqlite.db
 
+# --- tasks building static UI asset ---
+
 build-static-ui:
-	# Node.js v14.19.0 depedency, see repo root Docker file
-	# add requires "npm install"
+	# should run in the same directory as this makefile
 	rm -rf build
 	HOST_STATIC_SITE=true npm run build
+	echo "show size of output ./build-folder"
+	find build
+	du -hs build/*
+
+docker-build-image-for-build-static-ui:
+	docker build -f Dockerfile -t ui_build_image .
 
 docker-build-static-ui:
-	# Docker:ized version of "docker-build-static-ui"-task.
+	# Docker:ized version of "build-static-ui"-task.
 	# This must be executed in the same directory as this makefile.
-	docker run -t \
-	    --rm \
-	    --volume $$(pwd):/front-root \
-	    node:14.19.0-buster-slim \
-	        bash -c "( \
-	            apt-get update -y; \
-	            apt-get install -y make; \
-	            cd /front-root/; \
-	            npm install; \
-	            make build-static-ui \
+
+	# the below will install npm packages in mounted directory first time run
+	docker run -t --rm \
+	    --volume $$(pwd):/mlflow-server-js \
+	    ui_build_image \
+	    bash -c "( \
+	        cd /mlflow-server-js/; \
+	        time npm install; \
+	        time make build-static-ui; \
 	    )"

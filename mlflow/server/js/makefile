@@ -93,7 +93,7 @@ docker-build-static-ui:
 	# This must be executed in the same directory as this makefile.
 
 	# the below will install npm packages in mounted directory first time run
-	docker run -it --rm \
+	docker run -t --rm \
 	    --volume $$(pwd):/mlflow-server-js \
 	    ui_build_image \
 	    bash -c "( \

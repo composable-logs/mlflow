@@ -93,11 +93,28 @@ docker-build-static-ui:
 	# This must be executed in the same directory as this makefile.
 
 	# the below will install npm packages in mounted directory first time run
-	docker run -t --rm \
+	docker run -it --rm \
 	    --volume $$(pwd):/mlflow-server-js \
 	    ui_build_image \
 	    bash -c "( \
 	        cd /mlflow-server-js/; \
 	        time npm install; \
 	        time make build-static-ui; \
+	    )"
+
+docker-serve-static-ui-in-watch-mode:
+	# Docker:ized version of "watch-ui"-task.
+	# This must be executed in the same directory as this makefile.
+	#
+	# the below will install npm packages in mounted directory first time run
+	#
+	# Static website served in watch mode on localhost:3001
+	docker run -it --rm \
+	    --volume $$(pwd):/mlflow-server-js \
+		--publish 3001:3001 \
+	    ui_build_image \
+	    bash -c "( \
+	        cd /mlflow-server-js/; \
+	        time npm install; \
+	        time make watch-ui; \
 	    )"

@@ -18,8 +18,12 @@ const TASK_RUNID_TO_TASK_SOURCE_NAME = new Map(
     .map(([k, v]) => [k, v["metadata"]["attributes"]["task.notebook"]])
 );
 
-// eg. ["ingestion.py", "eda.py", "train.py", "evaluate.py"]
-const TASK_SOURCE_NAMES = [...new Set(TASK_RUNID_TO_TASK_SOURCE_NAME.values())];
+// List ML Flow experiments;
+//  - 1st entry "All pipeline runs", list pipeline runs with task-runs as sub-entries
+//  - after that list all notebooks eg ["ingestion.py", "eda.py", "train.py", "evaluate.py"]
+const TASK_SOURCE_NAMES = ["All pipeline runs"].concat(
+  [...new Set(TASK_RUNID_TO_TASK_SOURCE_NAME.values())]
+);
 
 const LOOKUP_TASK_SOURCE_NAME_TO_IDX = new Map([...TASK_SOURCE_NAMES.entries()].map(([idx, x]) => [x, "" + idx]));
 const LOOKUP_IDX_TO_TASK_SOURCE_NAME = new Map([...TASK_SOURCE_NAMES.entries()].map(([idx, x]) => ["" + idx, x]));
@@ -29,6 +33,10 @@ const _STATIC_EXPERIMENTS = () => {
 
   TASK_SOURCE_NAMES.forEach(sourceName => {
     const experimentId = LOOKUP_TASK_SOURCE_NAME_TO_IDX.get(sourceName);
+
+    const tasksDescription = "Task runs grouped by task name";
+    const pipelinesDescription = "List of pipeline runs with task-runs as sub-entries";
+
     experiments.push(
       {
         experiment_id: experimentId,
@@ -37,7 +45,7 @@ const _STATIC_EXPERIMENTS = () => {
         lifecycle_stage: 'active',
         tags: [{
           key: 'mlflow.note.content',
-          value: 'Task runs grouped by task name',
+          value: (experimentId === "0" ? pipelinesDescription : tasksDescription),
         },
         ],
       },
@@ -45,21 +53,54 @@ const _STATIC_EXPERIMENTS = () => {
   });
 
   return { experiments: experiments };
-}
+};
 
 const STATIC_EXPERIMENTS = _STATIC_EXPERIMENTS()
 
-const reformatEntry = (runId, entry) => {
-  const sourceName = entry["metadata"]["attributes"]["task.notebook"];
+// Array of ID:s for pipeline runs
+const ALL_PIPELINE_RUN_IDS = [...Object.entries(STATIC_DATA)
+  .filter(([runId, v]) => v.type === "pipeline")
+  .map(([runId, v]) => runId)
+];
+
+const PIPELINE_ID_TO_CHILDREN_RUN_IDS = (() => (
+  new Map(ALL_PIPELINE_RUN_IDS.map(pipelineId => {
+    const result = [];
+
+    Object.entries(STATIC_DATA).forEach(([vRunId, v]) => {
+      if ((v.type === "task") && (v.parent_id === pipelineId)) {
+        Object.entries(STATIC_DATA).forEach(([wRunId, w]) => {
+          if ((w.type === "run") && (w.parent_id === vRunId)) {
+            result.push(wRunId);
+          }
+        });
+      }
+    });
+    return [pipelineId, result];
+  }))
+))();
+
+const reformatEntry = (runId, entry, experimentId) => {
+  const isPipeline = entry.type === "pipeline";
+
+  var sourceName;
+  if (isPipeline) {
+    sourceName = "Pipeline run";
+  } else {
+    sourceName = entry["metadata"]["attributes"]["task.notebook"];
+  }
 
   var isSucess = (entry.metadata.status && entry.metadata.status.status_code && (entry.metadata.status.status_code == "OK"));
 
   var result = {
     info: {
       run_uuid: runId,
-      experiment_id: LOOKUP_TASK_SOURCE_NAME_TO_IDX.get(sourceName),
+      experiment_id: (!!experimentId ? experimentId : LOOKUP_TASK_SOURCE_NAME_TO_IDX.get(sourceName)),
       user_id: "info.user_id",
-      status: isSucess ? "FINISHED" : "FAILED",
+      // TODO: pipelines-summaries should also have status in data
+      // Now pipeline runs are always shown as successful (green icon) even
+      // if they contain failed tasks
+      status: (isPipeline || isSucess) ? "FINISHED" : "FAILED",
       start_time: entry.metadata.start_time,
       end_time: entry.metadata.end_time,
       artifact_uri: "artifact_uri",
@@ -100,6 +141,14 @@ const reformatEntry = (runId, entry) => {
     }
   };
 
+  if (entry.type === "run") {
+    const parentTaskId = STATIC_DATA[runId].parent_id;
+    result.data.tags.push({
+      key: "mlflow.parentRunId",
+      value: STATIC_DATA[parentTaskId].parent_id
+    });
+  }
+
   return result;
 };
 
@@ -126,7 +175,7 @@ export class StaticMlflowService {
   }) {
     return new Promise((resolve, reject) => {
       resolve(
-        { run: reformatEntry(run_id, STATIC_DATA[run_id]) }
+        { run: reformatEntry(run_id, STATIC_DATA[run_id], null) }
       )
     });
   }
@@ -151,22 +200,52 @@ export class StaticMlflowService {
       return new Promise((resolve, reject) => reject(new Error("Load more not supported in static mode.")));
     }
 
-    const validSources = new Set(experiment_ids.map(eid => LOOKUP_IDX_TO_TASK_SOURCE_NAME.get(eid)));
+    var result;
 
-    // get parent Task id:s whose runs should be shown
-    const taskIds = new Set(Object.entries(STATIC_DATA)
-      .filter(([runId, v]) => v.type === "task")
-      .filter(([runId, v]) => validSources.has(v["metadata"]["attributes"]["task.notebook"]))
-      .map(([runId, v]) => runId)
-    );
+    if ((experiment_ids.length === 1) && one(experiment_ids) === "0") {
+      // Return all pipeline runs run individual runs as children
 
-    // find all children (run:s) under these tasks
-    const runs = [...Object.entries(STATIC_DATA)
-      .filter(([runId, v]) => v.type === "run")
-      .filter(([runId, v]) => taskIds.has(v["parent_id"]))
-      .map(([runId, v]) => reformatEntry(runId, v))
-    ];
+      result = [];
+      for (const pipelineId of ALL_PIPELINE_RUN_IDS) {
+        const pipelineEntry = reformatEntry(pipelineId, STATIC_DATA[pipelineId], "0")
 
-    return new Promise((resolve, reject) => { resolve({ runs: runs }); });
+        result.push(pipelineEntry);
+
+        for (const childId of PIPELINE_ID_TO_CHILDREN_RUN_IDS.get(pipelineId)) {
+          // Note: here we are rewriting the ExperimentId for run:s when shown in
+          // "All Experiment" list. Otherwise, they will not show up in UI.
+          //
+          // This seems to work, but might not be ideal. If ML Flow front would
+          // cache experiment details by runID, this could break since details for
+          // one runID might have different experimentId dependening on where the
+          // details are shown (in list, or run details page).
+          //
+          // A solution would be to preface runID:s with prefix depending on use,
+          // like eg. "list-<run-id>" and "exp-<run-id>", but this also seems to
+          // work.
+          result.push(reformatEntry(childId, STATIC_DATA[childId], "0"));
+        }
+      }
+    } else {
+      const expId = one(experiment_ids); // will crash if searching for more experimentId:s
+
+      const validSources = new Set(experiment_ids.map(eid => LOOKUP_IDX_TO_TASK_SOURCE_NAME.get(eid)));
+
+      // get parent Task id:s whose runs should be shown
+      const taskIds = new Set(Object.entries(STATIC_DATA)
+        .filter(([runId, v]) => v.type === "task")
+        .filter(([runId, v]) => validSources.has(v["metadata"]["attributes"]["task.notebook"]))
+        .map(([runId, v]) => runId)
+      );
+
+      // find all children (run:s) under these tasks
+      result = [...Object.entries(STATIC_DATA)
+        .filter(([runId, v]) => v.type === "run")
+        .filter(([runId, v]) => taskIds.has(v["parent_id"]))
+        .map(([runId, v]) => reformatEntry(runId, v, expId))
+      ];
+    }
+
+    return new Promise((resolve, reject) => { resolve({ runs: result }); });
   }
 }

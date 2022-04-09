@@ -28,7 +28,7 @@ const TASK_SOURCE_NAMES = ["All pipeline runs"].concat(
 const LOOKUP_TASK_SOURCE_NAME_TO_IDX = new Map([...TASK_SOURCE_NAMES.entries()].map(([idx, x]) => [x, "" + idx]));
 const LOOKUP_IDX_TO_TASK_SOURCE_NAME = new Map([...TASK_SOURCE_NAMES.entries()].map(([idx, x]) => ["" + idx, x]));
 
-const _STATIC_EXPERIMENTS = () => {
+const STATIC_EXPERIMENTS = (() => {
   var experiments = [];
 
   TASK_SOURCE_NAMES.forEach(sourceName => {
@@ -53,9 +53,7 @@ const _STATIC_EXPERIMENTS = () => {
   });
 
   return { experiments: experiments };
-};
-
-const STATIC_EXPERIMENTS = _STATIC_EXPERIMENTS()
+})();
 
 // Array of ID:s for pipeline runs
 const ALL_PIPELINE_RUN_IDS = [...Object.entries(STATIC_DATA)

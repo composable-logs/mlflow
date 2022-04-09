@@ -129,8 +129,14 @@ export const getParentRunIdsToFetch = (runs) => {
 };
 
 // this function takes a response of runs and returns them along with their missing parents
-export const fetchMissingParents = (searchRunsResponse) =>
-  searchRunsResponse.runs && searchRunsResponse.runs.length
+export const fetchMissingParents = (searchRunsResponse) => {
+    if (process.env.HOST_STATIC_SITE) {
+      // return input as-is for static site; In this case, the search API should ensure there
+      // are no missing parents
+      return searchRunsResponse;
+    }
+
+    return searchRunsResponse.runs && searchRunsResponse.runs.length
     ? Promise.all(
         getParentRunIdsToFetch(searchRunsResponse.runs).map((runId) =>
           wrapDeferred(MlflowService.getRun, { run_id: runId })
@@ -151,6 +157,7 @@ export const fetchMissingParents = (searchRunsResponse) =>
         return searchRunsResponse;
       })
     : searchRunsResponse;
+};
 
 export const searchRunsPayload = ({
   experimentIds,

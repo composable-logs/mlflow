@@ -88,9 +88,9 @@ const reformatEntry = (runId, entry, experimentId) => {
     sourceName = entry["metadata"]["attributes"]["task.notebook"];
   }
 
-  var isSucess = (entry.metadata.status && entry.metadata.status.status_code && (entry.metadata.status.status_code == "OK"));
+  const isSucess = (entry.metadata.status && entry.metadata.status.status_code && (entry.metadata.status.status_code == "OK"));
 
-  var result = {
+  const result = {
     info: {
       run_uuid: runId,
       experiment_id: (!!experimentId ? experimentId : LOOKUP_TASK_SOURCE_NAME_TO_IDX.get(sourceName)),
@@ -133,7 +133,29 @@ const reformatEntry = (runId, entry, experimentId) => {
       },
       {
         key: "mlflow.note.content",
-        value: "description missing"
+        value: (() => {
+          // -- determine description --
+          if (isPipeline && !!entry.artifacts) {
+            const addImage = (header, filename) => {
+              const artifact_entries = entry.artifacts.filter((k) => k.file_name == filename);
+
+              if (artifact_entries.length === 1) {
+                return [
+                  `# ${header}`,
+                  `![${header}](./pipeline-artefacts/${one(artifact_entries).artifact_path})`
+                ];
+              } else {
+                return [];
+              }
+            };
+            return [
+              ...addImage("DAG diagram of task dependencies", "dag-diagram.png"),
+              ...addImage("Gantt diagram of task runs", "gantt-diagram.png")
+            ].join("\n");
+          } else {
+            return "No description";
+          }
+        })()
       }
       ],
       params: [...Object.entries(entry.metadata.attributes)

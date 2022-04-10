@@ -135,9 +135,52 @@ const reformatEntry = (runId, entry, experimentId) => {
         key: "mlflow.note.content",
         value: "description missing"
       }
-      ]
+      ],
+      params: [...Object.entries(entry.metadata.attributes)
+        .map(([k, v]) => ({ key: k, value: v }))
+      ],
+      metrics: []
     }
   };
+
+  // --- add logged metrics ---
+  // The complexity of the below code is due to our Python interface
+  // allows logging of arbitrary dicts/arrays, but MLFlow only allow
+  // numeric metrics.
+  //
+  // Also, this only keeps track of *one value* for the metric; ie.
+  // this does not support logging a loss function during training.
+  if (!!entry.metadata.logged_values) {
+    const log_kv = (k, v) => {
+      if (Number(v) !== v) {
+        throw new Error(`Too complex logged value ${k}=${v}`);
+      }
+
+      result.data.metrics.push({
+        key: k,
+        value: v,
+        // -- only one value --
+        timestamp: entry.metadata.start_time,
+        step: 0
+      });
+    };
+
+    Object.entries(entry.metadata.logged_values).forEach(([k, v]) => {
+      if ((v.type === "int") || (v.type === "float")) {
+        log_kv(k, v.value);
+      } else if ((v.type === "json") && Array.isArray(v.value)) {
+        for (const [idx, x] of v.value.entries()) {
+          log_kv(k + "." + idx, x);
+        }
+      } else if (v.type === "json") {
+        for (const [idx, x] of Object.entries(v.value)) {
+          log_kv(k + "=" + idx, x);
+        }
+      } else {
+        throw new Error(`Too complex logged value ${k}=${v}`);
+      }
+    });
+  }
 
   if (entry.type === "run") {
     const parentTaskId = STATIC_DATA[runId].parent_id;

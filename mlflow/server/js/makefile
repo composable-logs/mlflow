@@ -58,7 +58,7 @@ watch-ui:
 	#    set to "true" for hosting static (read only) version of ML Flow
 	# -----------------------------
 	(\
-	    PORT=3001 \
+	    PORT=3010 \
 	    HOST_STATIC_SITE=true \
 	    npm start \
 	)
@@ -108,10 +108,10 @@ docker-serve-static-ui-in-watch-mode:
 	#
 	# the below will install npm packages in mounted directory first time run
 	#
-	# Static website served in watch mode on localhost:3001
+	# Static website served in watch mode on localhost:3010
 	docker run -it --rm \
 	    --volume $$(pwd):/mlflow-server-js \
-		--publish 3001:3001 \
+	    --publish 3010:3010 \
 	    ui_build_image \
 	    bash -c "( \
 	        cd /mlflow-server-js/; \

@@ -137,7 +137,7 @@ const reformatEntry = (runId, entry, experimentId) => {
       }
       ],
       params: [...Object.entries(entry.metadata.attributes)
-        .map(([k, v]) => ({key: k, value: v}))
+        .map(([k, v]) => ({ key: k, value: v }))
       ],
       metrics: []
     }
@@ -158,7 +158,7 @@ const reformatEntry = (runId, entry, experimentId) => {
 
       result.data.metrics.push({
         key: k,
-        value: JSON.stringify(v),
+        value: v,
         // -- only one value --
         timestamp: entry.metadata.start_time,
         step: 0

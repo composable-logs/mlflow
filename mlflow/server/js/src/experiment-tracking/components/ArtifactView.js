@@ -92,7 +92,7 @@ export class ArtifactViewImpl extends Component {
               description='Label to display the full path of where the artifact of the experiment runs is located'
             />
           </label>{' '}
-          <Text className='artifact-info-text' ellipsis copyable>
+          <Text className='artifact-info-text' copyable>
             {activeNodeRealPath}
           </Text>
         </div>

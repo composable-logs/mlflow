@@ -51,6 +51,10 @@ if __name__ == "__main__":
             log_params(parameters)
             log_metrics(metrics)
 
+            mlflow.log_text("hello", "root_file.txt")
+            mlflow.log_text("world", "dir/data.txt")
+            mlflow.log_text("123", "dir/subdir/file.txt")
+
     # Runs with multiple values for a single metric so that we can QA the time-series metric
     # plot
     for i in range(3):

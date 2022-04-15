@@ -149,8 +149,8 @@ const reformatEntry = (runId, entry, experimentId) => {
               }
             };
             return [
-              ...addImage("DAG diagram of task dependencies", "dag-diagram.png"),
-              ...addImage("Gantt diagram of task runs", "gantt-diagram.png")
+              ...addImage("DAG diagram of task dependencies in pipeline", "dag-diagram.png"),
+              ...addImage("Gantt diagram of task runs in pipeline", "gantt-diagram.png")
             ].join("\n");
           } else {
             return "No description";
@@ -247,8 +247,26 @@ export class StaticMlflowService {
     run_uuid,
     path
   }) {
-    // TOOO: implement ARTEFACT_LIST_PER_STATIC_RUN etc with static hosted content
-    return new Promise((resolve, reject) => resolve([]));
+    const entry = STATIC_DATA[run_uuid];
+    var result;
+
+    if (!!entry && !!entry.artifacts) {
+      // return all files with directories expanded
+      result = {
+        "root_uri": "/path/to/somewhere/",
+        "files": [...entry.artifacts.map((entry) => ({
+          path: entry.name,
+          is_dir: false,
+          file_size: entry.size
+        }))]
+      };
+    } else {
+      result = {
+        root_uri: null,
+        files: []
+      };
+    }
+    return new Promise((resolve, reject) => resolve(result));
   }
 
   static searchRuns({

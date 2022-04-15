@@ -85,7 +85,7 @@ const reformatEntry = (runId, entry, experimentId) => {
   if (isPipeline) {
     sourceName = "Pipeline run";
   } else {
-    sourceName = entry["metadata"]["attributes"]["task.notebook"];
+    sourceName = entry["metadata"]["attributes"]["task.notebook"] || "Unknown"
   }
 
   const isSucess = (entry.metadata.status && entry.metadata.status.status_code && (entry.metadata.status.status_code == "OK"));
@@ -116,7 +116,7 @@ const reformatEntry = (runId, entry, experimentId) => {
       },
       {
         key: "mlflow.source.type",
-        value: "LOCAL"
+        value: isPipeline ? "PROJECT" : "NOTEBOOK"
       },
       {
         key: "mlflow.source.git.commit",
@@ -142,7 +142,7 @@ const reformatEntry = (runId, entry, experimentId) => {
               if (artifact_entries.length === 1) {
                 return [
                   `# ${header}`,
-                  `![${header}](./pipeline-artefacts/${one(artifact_entries).artifact_path})`
+                  `![${header}](./pipeline-artifacts/${one(artifact_entries).artifact_path})`
                 ];
               } else {
                 return [];

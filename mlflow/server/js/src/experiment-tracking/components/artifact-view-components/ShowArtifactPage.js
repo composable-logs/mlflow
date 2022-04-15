@@ -1,3 +1,4 @@
+import { STATIC_DATA } from '../../static-data/StaticData';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -140,8 +141,12 @@ const getFileTooLargeView = () => {
 };
 
 export const getSrc = (path, runUuid) => {
-  const basePath = 'get-artifact';
-  return `${basePath}?path=${encodeURIComponent(path)}&run_uuid=${encodeURIComponent(runUuid)}`;
+  if (process.env.HOST_STATIC_SITE) {
+    return `pipeline-artifacts/${STATIC_DATA[runUuid].artifacts_location}/${path}`;
+  } else {
+    const basePath = 'get-artifact';
+    return `${basePath}?path=${encodeURIComponent(path)}&run_uuid=${encodeURIComponent(runUuid)}`;
+  }
 };
 
 export default ShowArtifactPage;

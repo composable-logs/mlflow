@@ -92,7 +92,7 @@ export class ArtifactViewImpl extends Component {
               description='Label to display the full path of where the artifact of the experiment runs is located'
             />
           </label>{' '}
-          <Text className='artifact-info-text' ellipsis copyable>
+          <Text className='artifact-info-text' copyable>
             {activeNodeRealPath}
           </Text>
         </div>
@@ -193,7 +193,8 @@ export class ArtifactViewImpl extends Component {
     if (artifactNode.fileInfo) {
       const { path } = artifactNode.fileInfo;
       id = path;
-      name = getBasename(path);
+      // list artifacts: automatically expand all directories for static website
+      name = process.env.HOST_STATIC_SITE ? artifactNode.fileInfo.path : getBasename(path);
     }
 
     const toggleState = this.state.toggledNodeIds[id];

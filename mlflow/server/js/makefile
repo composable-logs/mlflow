@@ -2,23 +2,23 @@
 # --- repo root Dockerfile + VS Code dev container setup
 
 start-backend:
-	# clear any old experiments/artefacts
+	# clear any old experiments/artifacts
 	rm -rf /repo-root/mlflow/mlruns
 
 	(\
 	    cd /repo-root/; \
 	    rm -rf /repo-root/backend; \
-		mkdir -p /repo-root/backend/artefacts; \
+		mkdir -p /repo-root/backend/artifacts; \
 	    mlflow server \
 	        --backend-store-uri sqlite:////repo-root/backend/sqlite.db \
-	        --default-artifact-root /repo-root/backend/artefacts/ \
+	        --default-artifact-root /repo-root/backend/artifacts/ \
 	        --host 0.0.0.0 \
 	        --port 5000 \
 	        --gunicorn-opts '--log-level debug' \
 	)
 
 populate-backend:
-	# Populate backend with test experiment data (but no artefacts)
+	# Populate backend with test experiment data (but no artifacts)
 	(\
 	    MLFLOW_TRACKING_URI=http://127.0.0.1:5000 \
 	    python3 /repo-root/tests/generate_ui_test_data.py \

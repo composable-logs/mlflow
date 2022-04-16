@@ -85,12 +85,12 @@ const reformatEntry = (runId, entry, experimentId) => {
   if (isPipeline) {
     sourceName = "Pipeline run";
   } else {
-    sourceName = entry["metadata"]["attributes"]["task.notebook"];
+    sourceName = entry["metadata"]["attributes"]["task.notebook"] || "Unknown";
   }
 
-  var isSucess = (entry.metadata.status && entry.metadata.status.status_code && (entry.metadata.status.status_code == "OK"));
+  const isSucess = (entry.metadata.status && entry.metadata.status.status_code && (entry.metadata.status.status_code == "OK"));
 
-  var result = {
+  const result = {
     info: {
       run_uuid: runId,
       experiment_id: (!!experimentId ? experimentId : LOOKUP_TASK_SOURCE_NAME_TO_IDX.get(sourceName)),
@@ -116,7 +116,7 @@ const reformatEntry = (runId, entry, experimentId) => {
       },
       {
         key: "mlflow.source.type",
-        value: "LOCAL"
+        value: isPipeline ? "PROJECT" : "NOTEBOOK"
       },
       {
         key: "mlflow.source.git.commit",
@@ -133,7 +133,29 @@ const reformatEntry = (runId, entry, experimentId) => {
       },
       {
         key: "mlflow.note.content",
-        value: "description missing"
+        value: (() => {
+          // -- determine description --
+          if (isPipeline && !!entry.artifacts) {
+            const addImage = (header, filename) => {
+              const artifact_entries = entry.artifacts.filter((k) => k.name == filename);
+
+              if (artifact_entries.length === 1) {
+                return [
+                  `# ${header}`,
+                  `![${header}](./pipeline-artifacts/${entry.artifacts_location}/${filename})`
+                ];
+              } else {
+                return [];
+              }
+            };
+            return [
+              ...addImage("DAG diagram of task dependencies in this pipeline", "dag-diagram.png"),
+              ...addImage("Gantt diagram of task runs in pipeline", "gantt-diagram.png")
+            ].join("\n");
+          } else {
+            return "No description";
+          }
+        })()
       }
       ],
       params: [...Object.entries(entry.metadata.attributes)
@@ -225,8 +247,26 @@ export class StaticMlflowService {
     run_uuid,
     path
   }) {
-    // TOOO: implement ARTEFACT_LIST_PER_STATIC_RUN etc with static hosted content
-    return new Promise((resolve, reject) => resolve([]));
+    const entry = STATIC_DATA[run_uuid];
+    var result;
+
+    if (!!entry && !!entry.artifacts) {
+      // return all files with directories expanded
+      result = {
+        "root_uri": "/path/to/somewhere/",
+        "files": [...entry.artifacts.map((entry) => ({
+          path: entry.name,
+          is_dir: false,
+          file_size: entry.size
+        }))]
+      };
+    } else {
+      result = {
+        root_uri: null,
+        files: []
+      };
+    }
+    return new Promise((resolve, reject) => resolve(result));
   }
 
   static searchRuns({

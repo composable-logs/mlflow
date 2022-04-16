@@ -137,19 +137,19 @@ const reformatEntry = (runId, entry, experimentId) => {
           // -- determine description --
           if (isPipeline && !!entry.artifacts) {
             const addImage = (header, filename) => {
-              const artifact_entries = entry.artifacts.filter((k) => k.file_name == filename);
+              const artifact_entries = entry.artifacts.filter((k) => k.name == filename);
 
               if (artifact_entries.length === 1) {
                 return [
                   `# ${header}`,
-                  `![${header}](./pipeline-artifacts/${one(artifact_entries).artifact_path})`
+                  `![${header}](./pipeline-artifacts/${entry.artifacts_location}/${filename})`
                 ];
               } else {
                 return [];
               }
             };
             return [
-              ...addImage("DAG diagram of task dependencies in pipeline", "dag-diagram.png"),
+              ...addImage("DAG diagram of task dependencies in this pipeline", "dag-diagram.png"),
               ...addImage("Gantt diagram of task runs in pipeline", "gantt-diagram.png")
             ].join("\n");
           } else {

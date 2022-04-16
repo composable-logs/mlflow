@@ -130,13 +130,15 @@ export class ExperimentListView extends Component {
         />
         <div>
           <h1 className='experiments-header'>Experiments</h1>
-          <div className='experiment-list-create-btn-container'>
-            <i
-              onClick={this.handleCreateExperiment}
-              title='New Experiment'
-              className='fas fa-plus fa-border experiment-list-create-btn'
-            />
-          </div>
+          {process.env.HOST_STATIC_SITE ? null :
+            <div className='experiment-list-create-btn-container'>
+              <i
+                onClick={this.handleCreateExperiment}
+                title='New Experiment'
+                className='fas fa-plus fa-border experiment-list-create-btn'
+              />
+            </div>
+          }
           <div className='collapser-container'>
             <i
               onClick={this.props.onClickListExperiments}
@@ -144,14 +146,16 @@ export class ExperimentListView extends Component {
               className='collapser fa fa-chevron-left login-icon'
             />
           </div>
-          <Input
-            className='experiment-list-search-input'
-            type='text'
-            placeholder='Search Experiments'
-            aria-label='search experiments'
-            value={searchInput}
-            onChange={this.handleSearchInputChange}
-          />
+          {process.env.HOST_STATIC_SITE ? null :
+            <Input
+              className='experiment-list-search-input'
+              type='text'
+              placeholder='Search Experiments'
+              aria-label='search experiments'
+              value={searchInput}
+              onChange={this.handleSearchInputChange}
+            />
+          }
           <div className='experiment-list-container' style={{ height: experimentListHeight }}>
             {this.props.experiments
               // filter experiments based on searchInput
@@ -177,23 +181,27 @@ export class ExperimentListView extends Component {
                       to={Routes.getExperimentPageRoute(experiment_id)}
                       onClick={active ? (ev) => ev.preventDefault() : (ev) => ev}
                     >
-                      <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</div>
+                      <div style={{ overflow: 'hidden' }}>{name}</div>
                     </Link>
                     {/* Edit/Rename Experiment Option */}
-                    <IconButton
-                      icon={<EditOutlined />}
-                      onClick={this.handleRenameExperiment}
-                      data-experimentid={experiment_id}
-                      data-experimentname={name}
-                      style={{ marginRight: 10 }}
-                    />
+                    {process.env.HOST_STATIC_SITE ? null :
+                      <IconButton
+                        icon={<EditOutlined />}
+                        onClick={this.handleRenameExperiment}
+                        data-experimentid={experiment_id}
+                        data-experimentname={name}
+                        style={{ marginRight: 10 }}
+                      />
+                    }
                     {/* Delete Experiment option */}
-                    <IconButton
-                      icon={<i className='far fa-trash-alt' />}
-                      onClick={this.handleDeleteExperiment}
-                      data-experimentid={experiment_id}
-                      data-experimentname={name}
-                    />
+                    {process.env.HOST_STATIC_SITE ? null :
+                      <IconButton
+                        icon={<i className='far fa-trash-alt' />}
+                        onClick={this.handleDeleteExperiment}
+                        data-experimentid={experiment_id}
+                        data-experimentname={name}
+                      />
+                    }
                   </div>
                 );
               })}

@@ -388,7 +388,7 @@ export class RunViewImpl extends Component {
                   defaultMessage='Description'
                   description='Label for the notes editable content for the experiment run'
                 />
-                {!showNoteEditor && (
+                {!process.env.HOST_STATIC_SITE && !showNoteEditor && (
                   <>
                     {' '}
                     <Button

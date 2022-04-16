@@ -99,7 +99,8 @@ export class ExperimentView extends Component {
       showNotesEditor: false,
       showNotes: true,
       showFilters: false,
-      showOnboardingHelper: onboardingInformationStore.getItem('showTrackingHelper') === null,
+      showOnboardingHelper: !process.env.HOST_STATIC_SITE &&
+        (onboardingInformationStore.getItem('showTrackingHelper') === null),
       searchInput: props.searchInput,
       lastExperimentId: undefined,
     };

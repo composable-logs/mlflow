@@ -72,7 +72,10 @@ export class EditableTable extends React.Component {
   // see ML-11973
   getTotalTableWidth = () => _.sumBy(this.columns, 'width');
 
-  initColumns = () => [
+
+
+  initColumns = () => {
+    const keyValueColumns = [
     ...this.props.columns.map((col) =>
       col.editable
         ? {
@@ -91,8 +94,9 @@ export class EditableTable extends React.Component {
             ),
           }
         : col,
-    ),
-    {
+    )];
+
+    const actionColumn = {
       title: (
         <FormattedMessage
           defaultMessage='Actions'
@@ -159,8 +163,10 @@ export class EditableTable extends React.Component {
           </span>
         );
       },
-    },
-  ];
+    };
+    // hide the edit/delete action column for static sites
+    return keyValueColumns.concat(process.env.HOST_STATIC_SITE ? [] : [actionColumn]);
+  };
 
   isEditing = (record) => record.key === this.state.editingKey;
 

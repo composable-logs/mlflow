@@ -26,7 +26,7 @@ export function ExperimentNoteSection(props) {
             defaultMessage='Description'
             description='Header for displaying notes for the experiment table'
           />
-          {!showNotesEditor && (
+          {!process.env.HOST_STATIC_SITE && !showNotesEditor && (
             <Button type='link' onClick={startEditingDescription}>
               <FormattedMessage
                 defaultMessage='Edit'

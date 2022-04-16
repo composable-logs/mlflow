@@ -15,6 +15,7 @@ import Utils from '../../common/utils/Utils';
 import { getUUID } from '../../common/utils/ActionUtils';
 import './ArtifactPage.css';
 import { getLoggedModelPathsFromTags } from '../../common/utils/TagUtils';
+import { STATIC_DATA }  from '../static-data/StaticData';
 
 export class ArtifactPageImpl extends Component {
   static propTypes = {
@@ -161,6 +162,26 @@ const mapStateToProps = (state, ownProps) => {
       selectedPath = _.first(loggedModelPaths);
     }
   }
+
+  if (process.env.HOST_STATIC_SITE) {
+    const containsArtifact = (filename) => (
+      STATIC_DATA[runUuid]
+        .artifacts
+        .filter((k) => k.name == filename)
+        .length == 1
+    );
+
+    // (for notebook tasks) show rendered notebook if it exists
+    if (!selectedPath && containsArtifact("notebook.html")) {
+      selectedPath = "notebook.html";
+    }
+
+    // (for pipelines) show json summary if it exists
+    if (!selectedPath && containsArtifact("pipeline.json")) {
+      selectedPath = "pipeline.json";
+    }
+  }
+
   return { artifactRootUri, apis, initialSelectedArtifactPath: selectedPath };
 };
 

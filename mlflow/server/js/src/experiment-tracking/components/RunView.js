@@ -119,6 +119,10 @@ export class RunViewImpl extends Component {
   getRunCommand() {
     const { tags, params } = this.props;
     let runCommand = null;
+    if (process.env.HOST_STATIC_SITE) {
+      return runCommand;
+    }
+
     const sourceName = Utils.getSourceName(tags);
     const sourceVersion = Utils.getSourceVersion(tags);
     const entryPointName = Utils.getEntryPointName(tags);

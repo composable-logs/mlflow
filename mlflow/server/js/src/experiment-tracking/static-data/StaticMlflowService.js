@@ -85,7 +85,7 @@ const reformatEntry = (runId, entry, experimentId) => {
   if (isPipeline) {
     sourceName = "Pipeline run";
   } else {
-    sourceName = entry["metadata"]["attributes"]["task.notebook"] || "Unknown"
+    sourceName = entry["metadata"]["attributes"]["task.notebook"] || "Unknown";
   }
 
   const isSucess = (entry.metadata.status && entry.metadata.status.status_code && (entry.metadata.status.status_code == "OK"));

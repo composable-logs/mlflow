@@ -19,6 +19,7 @@ import { CollapsibleSection } from '../../common/components/CollapsibleSection';
 import { EditableNote } from '../../common/components/EditableNote';
 import { setTagApi, deleteTagApi } from '../actions';
 import { PageHeader, OverflowMenu } from '../../shared/building_blocks/PageHeader';
+import { DataBacklinkFooter } from '../static-data/UIConstants.js'
 
 export class RunViewImpl extends Component {
   static propTypes = {
@@ -222,20 +223,22 @@ export class RunViewImpl extends Component {
           breadcrumbs={breadcrumbs}
           feedbackForm={feedbackForm}
         >
-          <OverflowMenu
-            menu={[
-              {
-                id: 'overflow-rename-button',
-                onClick: this.handleRenameRunClick,
-                itemName: (
-                  <FormattedMessage
-                    defaultMessage='Rename'
-                    description='Menu item to rename an experiment run'
-                  />
-                ),
-              },
-            ]}
-          />
+          {process.env.HOST_STATIC_SITE ? null :
+            <OverflowMenu
+              menu={[
+                {
+                  id: 'overflow-rename-button',
+                  onClick: this.handleRenameRunClick,
+                  itemName: (
+                    <FormattedMessage
+                      defaultMessage='Rename'
+                      description='Menu item to rename an experiment run'
+                    />
+                  ),
+                },
+              ]}
+            />
+          }
         </PageHeader>
         <div className='header-container'>
           <RenameRunModal
@@ -533,6 +536,7 @@ export class RunViewImpl extends Component {
             <ArtifactPage runUuid={runUuid} modelVersions={modelVersions} runTags={tags} />
           </CollapsibleSection>
         </div>
+        {DataBacklinkFooter}
       </div>
     );
   }

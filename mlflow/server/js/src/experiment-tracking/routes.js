@@ -17,6 +17,8 @@ class Routes {
 
   static runPageRoute = '/experiments/:experimentId/runs/:runUuid';
 
+  static reportRoute = '/report/:reportId';
+
   static runPageWithArtifactSelectedRoute =
     '/experiments/:experimentId/runs/:runUuid/artifactPath/:initialSelectedArtifactPath+';
 

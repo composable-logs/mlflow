@@ -3,6 +3,7 @@ import './App.css';
 import logo from '../../common/static/home-logo.png';
 import { HashRouter as Router, Route, Link, NavLink } from 'react-router-dom';
 import { RunPage } from './RunPage';
+import { ReportPage } from './ReportPage';
 import Routes from '../routes';
 import { MetricPage } from './MetricPage';
 import CompareRunPage from './CompareRunPage';
@@ -90,6 +91,7 @@ class App extends Component {
               <Route exact path={Routes.experimentPageRoute} component={HomePage} />
               <Route exact path={Routes.runPageWithArtifactSelectedRoute} component={RunPage} />
               <Route exact path={Routes.runPageRoute} component={RunPage} />
+              <Route exact path={Routes.reportRoute} component={HomePage} />
               <Route exact path={Routes.metricPageRoute} component={MetricPage} />
               <Route exact path={Routes.compareRunPageRoute} component={CompareRunPage} />
               <Route path={Routes.experimentPageSearchRoute} component={HomePage} />

@@ -41,10 +41,9 @@ const mapStateToProps = (state, ownProps) => {
   const { match } = ownProps;
   if (match.url === '/') {
     return {};
-  } else if (match.path === Routes.reportRoute) {
-    // report/:reportId
+  } else if (!!match.params.reportId) {
     return {reportId : match.params.reportId};
-  } else if (match.path === Routes.experimentPageRoute) {
+  } else if (!!match.params.experimentId) {
     return { experimentId: match.params.experimentId };
   } else {
     return {};

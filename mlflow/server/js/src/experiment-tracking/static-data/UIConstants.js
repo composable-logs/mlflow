@@ -11,3 +11,14 @@ export const DataBacklinkFooter = <div
     <b> <a href="https://github.com/pynb-dag-runner/pynb-dag-runner">pynb-dag-runner</a> </b>
     (open source).
 </div>;
+
+/**
+ * Parameters for rendering site header
+ */
+
+export const SiteHeader = {
+    // header left, top row: Page title/project name. Links to site root.
+    title: "mnist-digits-demo-pipeline",
+    // header right link: (linked from header "Github"-link)
+    gh_link: "https://github.com/pynb-dag-runner/mnist-digits-demo-pipeline",
+};

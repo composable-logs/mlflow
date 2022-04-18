@@ -63,6 +63,7 @@ import {
   COLUMN_SORT_BY_DESC,
   SORT_DELIMITER_SYMBOL,
 } from '../constants';
+import { DataBacklinkFooter } from '../static-data/UIConstants.js'
 
 export const DEFAULT_EXPANDED_VALUE = false;
 const { Option } = Select;
@@ -1019,6 +1020,7 @@ export class ExperimentView extends Component {
               />
             )}
           </Spacer>
+          {DataBacklinkFooter}
         </div>
       </div>
     );

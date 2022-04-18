@@ -19,6 +19,7 @@ export class ExperimentListView extends Component {
     onClickListExperiments: PropTypes.func.isRequired,
     // If activeExperimentId is undefined, then the active experiment is the first one.
     activeExperimentId: PropTypes.string,
+    activeReportId: PropTypes.string,
     experiments: PropTypes.arrayOf(Experiment).isRequired,
   };
 
@@ -109,6 +110,24 @@ export class ExperimentListView extends Component {
     const experimentListHeight = height - 60 - 100;
     // get searchInput from state
     const { searchInput } = this.state;
+
+    const reportsAndDashboardEntries = (() => {
+      const active = this.props.activeReportId === "about";
+      const className = `experiment-list-item ${
+        active ? 'active-experiment-list-item' : ''
+      }`;
+
+      return <div className={`header-container ${className}`}>
+      <Link
+        style={{ textDecoration: 'none', color: 'unset', width: '80%' }}
+        to="/report/about"
+        onClick={active ? (ev) => ev.preventDefault() : (ev) => ev}
+      >
+      <div style={{ overflow: 'hidden' }}>About</div>
+    </Link>
+    </div>
+    })();
+
     return (
       <div className='experiment-list-outer-container'>
         <CreateExperimentModal
@@ -128,7 +147,21 @@ export class ExperimentListView extends Component {
           experimentId={this.state.selectedExperimentId}
           experimentName={this.state.selectedExperimentName}
         />
+        <div className='collapser-container'>
+          <i
+            onClick={this.props.onClickListExperiments}
+            title='Hide experiment list'
+            className='collapser fa fa-chevron-left login-icon'
+          />
+        </div>
+
         <div>
+          { /* Reports/dashbord list */ }
+          <h1 className='experiments-header'>Reports and dashboards</h1>
+          <div className='experiment-list-container' style={{ height: "50px" }}>
+              {reportsAndDashboardEntries}
+          </div>
+          { /* Experiments list */ }
           <h1 className='experiments-header'>Experiments</h1>
           {process.env.HOST_STATIC_SITE ? null :
             <div className='experiment-list-create-btn-container'>
@@ -139,13 +172,6 @@ export class ExperimentListView extends Component {
               />
             </div>
           }
-          <div className='collapser-container'>
-            <i
-              onClick={this.props.onClickListExperiments}
-              title='Hide experiment list'
-              className='collapser fa fa-chevron-left login-icon'
-            />
-          </div>
           {process.env.HOST_STATIC_SITE ? null :
             <Input
               className='experiment-list-search-input'

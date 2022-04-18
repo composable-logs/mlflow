@@ -53,7 +53,7 @@ input.experiment-list-search-input[type="text"]:focus{
 
 .collapser {
   display: inline-block;
-  background-color: #082142d6;
+  background-color: #2b8cbe; /* from color brewer project */
   color: #FFFFFF;
   font-size: 16px;
   line-height: 24px;

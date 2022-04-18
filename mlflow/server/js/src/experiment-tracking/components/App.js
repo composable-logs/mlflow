@@ -3,7 +3,6 @@ import './App.css';
 import logo from '../../common/static/home-logo.png';
 import { HashRouter as Router, Route, Link, NavLink } from 'react-router-dom';
 import { RunPage } from './RunPage';
-import { ReportPage } from './ReportPage';
 import Routes from '../routes';
 import { MetricPage } from './MetricPage';
 import CompareRunPage from './CompareRunPage';
@@ -24,6 +23,7 @@ import { ModelVersionPage } from '../../model-registry/components/ModelVersionPa
 import { ModelListPage } from '../../model-registry/components/ModelListPage';
 import { ModelPage } from '../../model-registry/components/ModelPage';
 import { CompareModelVersionsPage } from '../../model-registry/components/CompareModelVersionsPage';
+import { SiteHeader } from '../static-data/UIConstants';
 
 const isExperimentsActive = (match, location) => {
   // eslint-disable-next-line prefer-const
@@ -43,46 +43,65 @@ class App extends Component {
           <ErrorModal />
           {process.env.HIDE_HEADER === 'true' ? null : (
             <header className='App-header'>
-              <div className='mlflow-logo'>
-                <Link to={Routes.rootRoute} className='App-mlflow'>
-                  <img className='mlflow-logo' alt='MLflow' src={logo} />
-                </Link>
-              </div>
-              <div className='header-route-links'>
-                <NavLink
-                  strict
-                  to={Routes.rootRoute}
-                  activeStyle={classNames.activeNavLink}
-                  isActive={isExperimentsActive}
-                  className='header-nav-link'
-                >
-                  <div className='experiments'>
-                    <span>Experiments</span>
+              {process.env.HOST_STATIC_SITE ?
+                <>
+                  <div className='header-route-links'>
+                    <Link to={Routes.rootRoute} className='App-mlflow'>
+                      <div className='site-name-link'>{SiteHeader.title}</div>
+                    </Link>
                   </div>
-                </NavLink>
-                <NavLink
-                  strict
-                  to={modelListPageRoute}
-                  activeStyle={classNames.activeNavLink}
-                  className='header-nav-link header-nav-link-models'
-                >
-                  <div className='models'>
-                    <span>Models</span>
+                  <div className='header-links'>
+                    <a href={SiteHeader.gh_link}>
+                      <div className='docs'>
+                        <span>Github</span>
+                      </div>
+                    </a>
                   </div>
-                </NavLink>
-              </div>
-              <div className='header-links'>
-                <a href={'https://github.com/mlflow/mlflow'}>
-                  <div className='github'>
-                    <span>GitHub</span>
+                </> : null
+              }
+              {process.env.HOST_STATIC_SITE ? null :
+                <>
+                  <div className='mlflow-logo'>
+                    <Link to={Routes.rootRoute} className='App-mlflow'>
+                      <img className='mlflow-logo' alt='MLflow' src={logo} />
+                    </Link>
                   </div>
-                </a>
-                <a href={'https://mlflow.org/docs/latest/index.html'}>
-                  <div className='docs'>
-                    <span>Docs</span>
+                  <div className='header-route-links'>
+                    <NavLink
+                      strict
+                      to={Routes.rootRoute}
+                      activeStyle={classNames.activeNavLink}
+                      isActive={isExperimentsActive}
+                      className='header-nav-link'
+                    >
+                      <div className='experiments'>
+                        <span>Experiments</span>
+                      </div>
+                    </NavLink>
+                    <NavLink
+                      strict
+                      to={modelListPageRoute}
+                      activeStyle={classNames.activeNavLink}
+                      className='header-nav-link header-nav-link-models'
+                    >
+                      <div className='models'>
+                        <span>Models</span>
+                      </div>
+                    </NavLink>
                   </div>
-                </a>
-              </div>
+                  <div className='header-links'>
+                    <a href={'https://github.com/mlflow/mlflow'}>
+                      <div className='github'>
+                        <span>GitHub</span>
+                      </div>
+                    </a>
+                    <a href={'https://mlflow.org/docs/latest/index.html'}>
+                      <div className='docs'>
+                        <span>Docs</span>
+                      </div>
+                    </a>
+                  </div>
+                </>}
             </header>
           )}
           <AppErrorBoundary>

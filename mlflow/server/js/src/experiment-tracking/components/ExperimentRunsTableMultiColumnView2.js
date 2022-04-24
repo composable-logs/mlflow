@@ -214,6 +214,7 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
         {
           headerName: ATTRIBUTE_COLUMN_LABELS.SOURCE,
           field: 'source',
+          initialWidth: 200,
           cellRenderer: 'sourceCellRenderer',
           sortable: true,
           headerComponentParams: {
@@ -630,8 +631,8 @@ function DateCellRenderer(props) {
 DateCellRenderer.propTypes = { data: PropTypes.object };
 
 function SourceCellRenderer(props) {
-  const { tags, queryParams } = props.data;
-  const sourceType = Utils.renderSource(tags, queryParams);
+  const { tags, queryParams, runInfo } = props.data;
+  const sourceType = Utils.renderSource(tags, queryParams, runInfo.run_uuid);
   return sourceType ? (
     <React.Fragment>
       {Utils.renderSourceTypeIcon(tags)}

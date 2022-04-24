@@ -12,6 +12,7 @@ import { message } from 'antd';
 import _ from 'lodash';
 import { ErrorCodes, SupportPageUrl } from '../constants';
 import { FormattedMessage } from 'react-intl';
+import { STATIC_DATA } from '../../experiment-tracking/static-data/StaticData';
 
 message.config({
   maxCount: 1,
@@ -371,6 +372,41 @@ class Utils {
     return tags && tags[revisionIdTag] && tags[revisionIdTag].value;
   }
 
+  static renderSourceStaticGH(runUuid) {
+    const runEntry = STATIC_DATA[runUuid];
+    const runAttributes = runEntry.metadata.attributes;
+
+    var desc;
+
+    if (runEntry.type === 'pipeline') {
+      desc = 'Pipeline run';
+
+      var url;
+      // eg. owner/repo-name
+      const ghRepoName = runAttributes['pipeline.github.repository'];
+      // eg. 1234567890
+      const ghRunId = runAttributes['pipeline.github.run_id'];
+
+      if (!!ghRepoName && !!ghRunId) {
+        url = `https://github.com/${ghRepoName}/actions/runs/${ghRunId}`;
+      }
+      return !url ? desc : <a target='_top' href={url}>{desc}</a>
+
+    } else if (runEntry.type === 'run') {
+      if (runAttributes['task.task_type'] === 'jupytext') {
+        if (!!runAttributes['task.notebook']) {
+          desc = runAttributes['task.notebook'];
+        }
+      } else {
+        desc = 'NA';
+      }
+
+      return desc;
+    } else {
+      return '---';
+    }
+  }
+
   /**
    * Renders the source name and entry point into an HTML element. Used for display.
    * @param tags Object containing tag key value pairs.
@@ -378,6 +414,10 @@ class Utils {
    * @param runUuid ID of the MLflow run to add to certain source (revision) links.
    */
   static renderSource(tags, queryParams, runUuid) {
+    if (process.env.HOST_STATIC_SITE) {
+      return Utils.renderSourceStaticGH(runUuid);
+    }
+
     const sourceName = Utils.getSourceName(tags);
     const sourceType = Utils.getSourceType(tags);
     let res = Utils.formatSource(tags);
@@ -597,11 +637,21 @@ class Utils {
 
   // TODO(aaron) Remove runInfo when user_id deprecation is complete.
   static getUser(runInfo, runTags) {
-    const userTag = runTags[Utils.userTag];
-    if (userTag) {
-      return userTag.value;
+    if (process.env.HOST_STATIC_SITE) {
+      try {
+        // for scheduled runs, this will return last person to have edited the GHA yaml.
+        return STATIC_DATA[runInfo.run_uuid].metadata.attributes["pipeline.github.actor"];
+      } catch(err) {
+        return 'unknown';
+      }
+    } else {
+      const userTag = runTags[Utils.userTag];
+      if (userTag) {
+        const userTag = runTags[Utils.userTag];
+        return userTag.value;
+      }
+      return runInfo.user_id;
     }
-    return runInfo.user_id;
   }
 
   static renderVersion(tags, shortVersion = true) {

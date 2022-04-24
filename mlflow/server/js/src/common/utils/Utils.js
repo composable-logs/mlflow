@@ -12,6 +12,7 @@ import { message } from 'antd';
 import _ from 'lodash';
 import { ErrorCodes, SupportPageUrl } from '../constants';
 import { FormattedMessage } from 'react-intl';
+import { STATIC_DATA } from '../../experiment-tracking/static-data/StaticData';
 
 message.config({
   maxCount: 1,
@@ -597,11 +598,21 @@ class Utils {
 
   // TODO(aaron) Remove runInfo when user_id deprecation is complete.
   static getUser(runInfo, runTags) {
-    const userTag = runTags[Utils.userTag];
-    if (userTag) {
-      return userTag.value;
+    if (process.env.HOST_STATIC_SITE) {
+      try {
+        // for scheduled runs, this will return last person to have edited the GHA yaml.
+        return STATIC_DATA[runInfo.run_uuid].metadata.attributes["pipeline.github.actor"];
+      } catch(err) {
+        return 'unknown';
+      }
+    } else {
+      const userTag = runTags[Utils.userTag];
+      if (userTag) {
+        const userTag = runTags[Utils.userTag];
+        return userTag.value;
+      }
+      return runInfo.user_id;
     }
-    return runInfo.user_id;
   }
 
   static renderVersion(tags, shortVersion = true) {

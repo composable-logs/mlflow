@@ -372,6 +372,42 @@ class Utils {
     return tags && tags[revisionIdTag] && tags[revisionIdTag].value;
   }
 
+  static renderSourceStaticGH(runUuid) {
+    const runEntry = STATIC_DATA[runUuid];
+    const runAttributes = runEntry.metadata.attributes;
+
+    var desc;
+
+    if (runEntry.type === 'pipeline') {
+      desc = 'Pipeline run';
+
+      var url;
+      // eg. owner/repo-name
+      const ghRepoName = runAttributes['pipeline.github.repository'];
+      // eg. 1234567890
+      const ghRunId = runAttributes['pipeline.github.run_id'];
+
+      if (!!ghRepoName && !!ghRunId) {
+        url = `https://github.com/${ghRepoName}/actions/runs/${ghRunId}`;
+        desc += " (gha)";
+      }
+      return !url ? desc : <a target='_top' href={url}>{desc}</a>
+
+    } else if (runEntry.type === 'run') {
+      if (runAttributes['task.task_type'] === 'jupytext') {
+        if (!!runAttributes['task.notebook']) {
+          desc = runAttributes['task.notebook'];
+        }
+      } else {
+        desc = 'NA';
+      }
+
+      return desc;
+    } else {
+      return `Unknown: ${runEntry.type}`;
+    }
+  }
+
   /**
    * Renders the source name and entry point into an HTML element. Used for display.
    * @param tags Object containing tag key value pairs.
@@ -379,6 +415,10 @@ class Utils {
    * @param runUuid ID of the MLflow run to add to certain source (revision) links.
    */
   static renderSource(tags, queryParams, runUuid) {
+    if (process.env.HOST_STATIC_SITE) {
+      return Utils.renderSourceStaticGH(runUuid);
+    }
+
     const sourceName = Utils.getSourceName(tags);
     const sourceType = Utils.getSourceType(tags);
     let res = Utils.formatSource(tags);

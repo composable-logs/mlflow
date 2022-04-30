@@ -8,7 +8,7 @@ export const MLMODEL_FILE_NAME = 'MLmodel';
 export const ONE_MB = 1024 * 1024;
 
 
-function getAttributeColumnLabels(includeModels, includeTrigger) {
+function getAttributeColumnLabels(addStaticSiteColumns, addNonStaticSiteColumns) {
   let result = {
     DATE: 'Start Time',
     DURATION: 'Duration',
@@ -17,11 +17,12 @@ function getAttributeColumnLabels(includeModels, includeTrigger) {
     SOURCE: 'Source',
     VERSION: 'Version',
   };
-  if (includeModels) {
-    result['MODELS'] = "Models";
+  if (addStaticSiteColumns) {
+    result['TRIGGER'] = 'Trigger';
+    result['BRANCH'] = 'Branch';
   }
-  if (includeTrigger) {
-    result['TRIGGER'] = "Trigger";
+  if (addNonStaticSiteColumns) {
+      result['MODELS'] = 'Models';
   }
   return result;
 }
@@ -33,8 +34,8 @@ export const ATTRIBUTE_COLUMN_LABELS = getAttributeColumnLabels(true, true);
 //  - include MODELS on-nonstatic sites
 //  - include TRIGGER on static sites
 export const ATTRIBUTE_COLUMN_LABELS_FILTERED = (process.env.HOST_STATIC_SITE
-  ? getAttributeColumnLabels(false, true)
-  : getAttributeColumnLabels(true, false)
+  ? getAttributeColumnLabels(true, false)
+  : getAttributeColumnLabels(false, true)
 );
 
 export const ATTRIBUTE_COLUMN_SORT_LABEL = {

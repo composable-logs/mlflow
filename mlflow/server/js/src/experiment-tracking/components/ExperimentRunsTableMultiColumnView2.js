@@ -237,10 +237,20 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
           },
           cellStyle,
         },
+        // From https://www.ag-grid.com/react-data-grid/scrolling-performance/
+        // Since mlflow uses "@ag-grid-community/react": "^25.0.0"
+        // there seems to be an advantage of avoiding React components
+        // for cell formatting.
         {
           headerName: ATTRIBUTE_COLUMN_LABELS.TRIGGER,
           field: 'trigger',
-          initialWidth: 120,
+          cellRenderer: (x) => x.value,
+          initialWidth: 60,
+        },
+        {
+          headerName: ATTRIBUTE_COLUMN_LABELS.BRANCH,
+          field: 'branch',
+          initialWidth: 80,
         },
         {
           headerName: ATTRIBUTE_COLUMN_LABELS.MODELS,
@@ -350,7 +360,6 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
       const startTime = runInfo.start_time;
       const duration = Utils.getDuration(runInfo.start_time, runInfo.end_time);
       const runName = Utils.getRunName(tags) || '-';
-      const trigger = Utils.getTrigger(runInfo.run_uuid) || '-';
       const visibleTags = Utils.getVisibleTagValues(tags).map(([key, value]) => ({
         key,
         value,
@@ -365,7 +374,8 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
         tags,
         queryParams,
         modelVersionsByRunUuid,
-        trigger,
+        trigger: Utils.renderTrigger(runInfo.run_uuid) || '-',
+        branch: Utils.getBranch(runInfo.run_uuid) || '-',
         isParent,
         hasExpander,
         expanderOpen,

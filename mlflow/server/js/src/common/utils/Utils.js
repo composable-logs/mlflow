@@ -636,9 +636,39 @@ class Utils {
     return '';
   }
 
-  static getTrigger(runUuid) {
+  static renderTrigger(runUuid) {
     if (process.env.HOST_STATIC_SITE) {
-      return runUuid;
+      const attributes = STATIC_DATA[runUuid].metadata.attributes;
+      const ghEventName = attributes['pipeline.github.event_name'];
+
+      if (ghEventName === 'pull_request') {
+        const githubRepo = attributes['pipeline.github.repository'];
+        const prRef = attributes['pipeline.github.ref_name'];  // eg. 42/ref
+        const url = `https://github.com/${githubRepo}/pull/${prRef}`;
+
+        // see https://stackoverflow.com/a/1862219
+        const desc = 'PR' + prRef.replace(/\D/g, '');
+
+        // hover text branch -> target branch
+        const ghBaseRef = attributes['pipeline.github.base_ref'];
+        const ghHeadRef = attributes['pipeline.github.head_ref'];
+        const hoverText = `${ghHeadRef} → ${ghBaseRef}`;
+
+        return `<a href=${url} target='_blank' title='${hoverText}'>${desc}</a>`;
+      } else if (ghEventName === 'schedule') {
+        return 'Schedule';
+      } else if (ghEventName === 'push') {
+        return 'New commit';
+      } else {
+        return ghEventName;
+      }
+    }
+  }
+
+  static getBranch(runUuid) {
+    if (process.env.HOST_STATIC_SITE) {
+      const attributes = STATIC_DATA[runUuid].metadata.attributes;
+      return attributes['pipeline.github.head_ref'];
     }
   }
 

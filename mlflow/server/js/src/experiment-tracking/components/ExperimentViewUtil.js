@@ -142,7 +142,7 @@ export default class ExperimentViewUtil {
         className: 'run-table-container',
         children: (
           <div className='truncate-text single-line' style={ExperimentViewUtil.styles.runInfoCell}>
-            {Utils.renderVersion(tags)}
+            {Utils.renderVersion(tags, true, runInfo.run_uuid)}
           </div>
         ),
       },

@@ -647,7 +647,7 @@ SourceCellRenderer.propTypes = { data: PropTypes.object };
 
 function VersionCellRenderer(props) {
   const { tags } = props.data;
-  return Utils.renderVersion(tags) || EMPTY_CELL_PLACEHOLDER;
+  return Utils.renderVersion(tags, true, props.data.runInfo.run_uuid) || EMPTY_CELL_PLACEHOLDER;
 }
 
 export function ModelsCellRenderer(props) {

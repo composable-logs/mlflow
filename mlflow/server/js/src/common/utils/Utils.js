@@ -389,6 +389,7 @@ class Utils {
 
       if (!!ghRepoName && !!ghRunId) {
         url = `https://github.com/${ghRepoName}/actions/runs/${ghRunId}`;
+        desc += " (gha)";
       }
       return !url ? desc : <a target='_top' href={url}>{desc}</a>
 
@@ -403,7 +404,7 @@ class Utils {
 
       return desc;
     } else {
-      return '---';
+      return `Unknown: ${runEntry.type}`;
     }
   }
 

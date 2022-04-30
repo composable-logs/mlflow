@@ -636,6 +636,12 @@ class Utils {
     return '';
   }
 
+  static getTrigger(runUuid) {
+    if (process.env.HOST_STATIC_SITE) {
+      return runUuid;
+    }
+  }
+
   // TODO(aaron) Remove runInfo when user_id deprecation is complete.
   static getUser(runInfo, runTags) {
     if (process.env.HOST_STATIC_SITE) {

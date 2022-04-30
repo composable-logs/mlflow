@@ -26,7 +26,7 @@ import { AgGridPersistedState } from '../sdk/MlflowLocalStorageMessages';
 import { TrimmedText } from '../../common/components/TrimmedText';
 import { getModelVersionPageRoute } from '../../model-registry/routes';
 import { css } from 'emotion';
-import { COLUMN_TYPES, ATTRIBUTE_COLUMN_LABELS, ATTRIBUTE_COLUMN_SORT_KEY } from '../constants';
+import { COLUMN_TYPES, ATTRIBUTE_COLUMN_LABELS, ATTRIBUTE_COLUMN_LABELS_FILTERED, ATTRIBUTE_COLUMN_SORT_KEY } from '../constants';
 
 const PARAM_PREFIX = '$$$param$$$';
 const METRIC_PREFIX = '$$$metric$$$';
@@ -227,6 +227,7 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
         {
           headerName: ATTRIBUTE_COLUMN_LABELS.VERSION,
           field: 'version',
+          initialWidth: 70,
           cellRenderer: 'versionCellRenderer',
           sortable: true,
           headerComponentParams: {
@@ -237,12 +238,18 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
           cellStyle,
         },
         {
+          headerName: ATTRIBUTE_COLUMN_LABELS.TRIGGER,
+          field: 'trigger',
+          initialWidth: 120,
+        },
+        {
           headerName: ATTRIBUTE_COLUMN_LABELS.MODELS,
           field: 'models',
           cellRenderer: 'modelsCellRenderer',
           initialWidth: 200,
         },
-      ].filter((c) => !categorizedUncheckedKeys[COLUMN_TYPES.ATTRIBUTES].includes(c.headerName)),
+      ].filter((c) => !categorizedUncheckedKeys[COLUMN_TYPES.ATTRIBUTES].includes(c.headerName))
+      .filter((c) => Object.values(ATTRIBUTE_COLUMN_LABELS_FILTERED).includes(c.headerName)),
       {
         headerName: 'Metrics',
         children: metricKeyList.map((metricKey, i) => {
@@ -343,6 +350,7 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
       const startTime = runInfo.start_time;
       const duration = Utils.getDuration(runInfo.start_time, runInfo.end_time);
       const runName = Utils.getRunName(tags) || '-';
+      const trigger = Utils.getTrigger(runInfo.run_uuid) || '-';
       const visibleTags = Utils.getVisibleTagValues(tags).map(([key, value]) => ({
         key,
         value,
@@ -357,6 +365,7 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
         tags,
         queryParams,
         modelVersionsByRunUuid,
+        trigger,
         isParent,
         hasExpander,
         expanderOpen,

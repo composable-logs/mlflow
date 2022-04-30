@@ -7,15 +7,35 @@ export const COLUMN_TYPES = {
 export const MLMODEL_FILE_NAME = 'MLmodel';
 export const ONE_MB = 1024 * 1024;
 
-export const ATTRIBUTE_COLUMN_LABELS = {
-  DATE: 'Start Time',
-  DURATION: 'Duration',
-  USER: 'User',
-  RUN_NAME: 'Run Name',
-  SOURCE: 'Source',
-  VERSION: 'Version',
-  MODELS: 'Models',
-};
+
+function getAttributeColumnLabels(includeModels, includeTrigger) {
+  let result = {
+    DATE: 'Start Time',
+    DURATION: 'Duration',
+    USER: 'User',
+    RUN_NAME: 'Run Name',
+    SOURCE: 'Source',
+    VERSION: 'Version',
+  };
+  if (includeModels) {
+    result['MODELS'] = "Models";
+  }
+  if (includeTrigger) {
+    result['TRIGGER'] = "Trigger";
+  }
+  return result;
+}
+
+// all attribute columns
+export const ATTRIBUTE_COLUMN_LABELS = getAttributeColumnLabels(true, true);
+
+// filtered attribute columns:
+//  - include MODELS on-nonstatic sites
+//  - include TRIGGER on static sites
+export const ATTRIBUTE_COLUMN_LABELS_FILTERED = (process.env.HOST_STATIC_SITE
+  ? getAttributeColumnLabels(false, true)
+  : getAttributeColumnLabels(true, false)
+);
 
 export const ATTRIBUTE_COLUMN_SORT_LABEL = {
   DATE: 'Start Time',

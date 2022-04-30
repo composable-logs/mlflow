@@ -658,7 +658,7 @@ class Utils {
       } else if (ghEventName === 'schedule') {
         return 'Schedule';
       } else if (ghEventName === 'push') {
-        return 'New commit';
+        return 'Push';
       } else {
         return ghEventName;
       }
@@ -676,9 +676,17 @@ class Utils {
   static getUser(runInfo, runTags) {
     if (process.env.HOST_STATIC_SITE) {
       try {
-        // for scheduled runs, this will return last person to have edited the GHA yaml.
-        return STATIC_DATA[runInfo.run_uuid].metadata.attributes["pipeline.github.actor"];
-      } catch(err) {
+        const attributes = STATIC_DATA[runInfo.run_uuid].metadata.attributes;
+        const ghEventName = attributes['pipeline.github.event_name'];
+
+        if (ghEventName !== 'schedule') {
+          // Do not return after for scheduled runs. The actor would be last person to modify
+          // gha yaml definition.
+          // See
+          // https://github.community/t/who-will-be-the-github-actor-when-a-workflow-runs-on-a-schedule/17369
+          return attributes['pipeline.github.actor'];
+        }
+      } catch (err) {
         return 'unknown';
       }
     } else {
@@ -700,7 +708,7 @@ class Utils {
     if (!!gitSha && !!githubRepo) {
       const linkString = shortVersion ? gitSha.substring(0, 6) : gitSha;
       const url = `https://github.com/${githubRepo}/commit/${gitSha}`;
-      return <a href={url} target='_top'>{linkString}</a>;
+      return <a href={url} target='_top' title='git commit sha'>{linkString}</a>;
     }
   }
 

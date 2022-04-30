@@ -15,7 +15,7 @@ function getAttributeColumnLabels(addStaticSiteColumns, addNonStaticSiteColumns)
     USER: 'User',
     RUN_NAME: 'Run Name',
     SOURCE: 'Source',
-    VERSION: 'Version',
+    VERSION: process.env.HOST_STATIC_SITE ? 'Commit' : 'Version',
   };
   if (addStaticSiteColumns) {
     result['TRIGGER'] = 'Trigger';

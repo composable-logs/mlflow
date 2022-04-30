@@ -201,25 +201,40 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
           cellStyle,
         },
         {
+          headerName: ATTRIBUTE_COLUMN_LABELS.SOURCE,
+          field: 'source',
+          initialWidth: 150,
+          cellRenderer: 'sourceCellRenderer',
+          sortable: true,
+          headerComponentParams: {
+            ...commonSortOrderProps,
+            canonicalSortKey: ATTRIBUTE_COLUMN_SORT_KEY.SOURCE,
+            computedStylesOnSortKey: headerStyle,
+          },
+          cellStyle,
+        },
+        // From https://www.ag-grid.com/react-data-grid/scrolling-performance/
+        // Since mlflow uses "@ag-grid-community/react": "^25.0.0"
+        // there seems to be an advantage of avoiding React components
+        // for cell formatting.
+        {
+          headerName: ATTRIBUTE_COLUMN_LABELS.TRIGGER,
+          field: 'trigger',
+          cellRenderer: (x) => x.value,
+          initialWidth: 80,
+        },
+        {
+          headerName: ATTRIBUTE_COLUMN_LABELS.BRANCH,
+          field: 'branch',
+          initialWidth: 100,
+        },
+        {
           headerName: ATTRIBUTE_COLUMN_LABELS.USER,
           field: 'user',
           sortable: true,
           headerComponentParams: {
             ...commonSortOrderProps,
             canonicalSortKey: ATTRIBUTE_COLUMN_SORT_KEY.USER,
-            computedStylesOnSortKey: headerStyle,
-          },
-          cellStyle,
-        },
-        {
-          headerName: ATTRIBUTE_COLUMN_LABELS.SOURCE,
-          field: 'source',
-          initialWidth: 200,
-          cellRenderer: 'sourceCellRenderer',
-          sortable: true,
-          headerComponentParams: {
-            ...commonSortOrderProps,
-            canonicalSortKey: ATTRIBUTE_COLUMN_SORT_KEY.SOURCE,
             computedStylesOnSortKey: headerStyle,
           },
           cellStyle,
@@ -236,21 +251,6 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
             computedStylesOnSortKey: headerStyle,
           },
           cellStyle,
-        },
-        // From https://www.ag-grid.com/react-data-grid/scrolling-performance/
-        // Since mlflow uses "@ag-grid-community/react": "^25.0.0"
-        // there seems to be an advantage of avoiding React components
-        // for cell formatting.
-        {
-          headerName: ATTRIBUTE_COLUMN_LABELS.TRIGGER,
-          field: 'trigger',
-          cellRenderer: (x) => x.value,
-          initialWidth: 60,
-        },
-        {
-          headerName: ATTRIBUTE_COLUMN_LABELS.BRANCH,
-          field: 'branch',
-          initialWidth: 80,
         },
         {
           headerName: ATTRIBUTE_COLUMN_LABELS.MODELS,

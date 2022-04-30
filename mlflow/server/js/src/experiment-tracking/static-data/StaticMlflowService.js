@@ -88,7 +88,7 @@ const reformatEntry = (runId, entry, experimentId) => {
     sourceName = entry["metadata"]["attributes"]["task.notebook"] || "Unknown";
   }
 
-  const isSucess = (entry.metadata.status && entry.metadata.status.status_code && (entry.metadata.status.status_code == "OK"));
+  const isSucess = (entry.metadata.status && entry.metadata.status.status_code && (entry.metadata.status.status_code === "OK"));
 
   const result = {
     info: {
@@ -137,7 +137,7 @@ const reformatEntry = (runId, entry, experimentId) => {
           // -- determine description --
           if (isPipeline && !!entry.artifacts) {
             const addImage = (header, filename) => {
-              const artifact_entries = entry.artifacts.filter((k) => k.name == filename);
+              const artifact_entries = entry.artifacts.filter((k) => k.name === filename);
 
               if (artifact_entries.length === 1) {
                 return [

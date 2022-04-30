@@ -277,7 +277,7 @@ export class RunViewImpl extends Component {
                 description: 'Label for displaying the tag or the commit hash of the git commit',
               })}
             >
-              {Utils.renderVersion(tags, false)}
+              {Utils.renderVersion(tags, false, runUuid)}
             </Descriptions.Item>
           ) : null}
           {Utils.getSourceType(tags) === 'PROJECT' ? (

@@ -167,8 +167,8 @@ const mapStateToProps = (state, ownProps) => {
     const containsArtifact = (filename) => (
       STATIC_DATA[runUuid]
         .artifacts
-        .filter((k) => k.name == filename)
-        .length == 1
+        .filter((k) => k.name === filename)
+        .length === 1
     );
 
     // (for notebook tasks) show rendered notebook if it exists

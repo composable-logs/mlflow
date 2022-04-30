@@ -6,7 +6,6 @@ import RequestStateWrapper from '../../common/components/RequestStateWrapper';
 import './HomePage.css';
 import HomeView from './HomeView';
 import { getUUID } from '../../common/utils/ActionUtils';
-import Routes from '../routes';
 
 export class HomePageImpl extends Component {
   static propTypes = {

@@ -655,7 +655,23 @@ class Utils {
     }
   }
 
-  static renderVersion(tags, shortVersion = true) {
+  static renderVersionStaticGH(shortVersion, runUuid) {
+    const attributes = STATIC_DATA[runUuid].metadata.attributes;
+
+    const gitSha = attributes["pipeline.github.sha"];
+    const githubRepo = attributes["pipeline.github.repository"];
+
+    if (!!gitSha && !!githubRepo) {
+      const linkString = shortVersion ? gitSha.substring(0, 6) : gitSha;
+      const url = `https://github.com/${githubRepo}/commit/${gitSha}`;
+      return <a href={url} target='_top'>{linkString}</a>;
+    }
+  }
+
+  static renderVersion(tags, shortVersion = true, runUuid) {
+    if (process.env.HOST_STATIC_SITE) {
+      return Utils.renderVersionStaticGH(shortVersion, runUuid);
+    }
     const sourceVersion = Utils.getSourceVersion(tags);
     const sourceName = Utils.getSourceName(tags);
     const sourceType = Utils.getSourceType(tags);

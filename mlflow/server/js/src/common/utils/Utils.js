@@ -668,7 +668,13 @@ class Utils {
   static getBranch(runUuid) {
     if (process.env.HOST_STATIC_SITE) {
       const attributes = STATIC_DATA[runUuid].metadata.attributes;
-      return attributes['pipeline.github.head_ref'];
+      const ghEventName = attributes['pipeline.github.event_name'];
+
+      if (ghEventName === 'pull_request') {
+        return attributes['pipeline.github.head_ref'];
+      } else {
+        return attributes['pipeline.github.ref_name'];
+      }
     }
   }
 

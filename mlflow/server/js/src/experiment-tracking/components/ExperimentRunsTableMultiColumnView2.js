@@ -26,7 +26,7 @@ import { AgGridPersistedState } from '../sdk/MlflowLocalStorageMessages';
 import { TrimmedText } from '../../common/components/TrimmedText';
 import { getModelVersionPageRoute } from '../../model-registry/routes';
 import { css } from 'emotion';
-import { COLUMN_TYPES, ATTRIBUTE_COLUMN_LABELS, ATTRIBUTE_COLUMN_SORT_KEY } from '../constants';
+import { COLUMN_TYPES, ATTRIBUTE_COLUMN_LABELS, ATTRIBUTE_COLUMN_LABELS_FILTERED, ATTRIBUTE_COLUMN_SORT_KEY } from '../constants';
 
 const PARAM_PREFIX = '$$$param$$$';
 const METRIC_PREFIX = '$$$metric$$$';
@@ -201,6 +201,34 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
           cellStyle,
         },
         {
+          headerName: ATTRIBUTE_COLUMN_LABELS.SOURCE,
+          field: 'source',
+          initialWidth: 150,
+          cellRenderer: 'sourceCellRenderer',
+          sortable: true,
+          headerComponentParams: {
+            ...commonSortOrderProps,
+            canonicalSortKey: ATTRIBUTE_COLUMN_SORT_KEY.SOURCE,
+            computedStylesOnSortKey: headerStyle,
+          },
+          cellStyle,
+        },
+        // From https://www.ag-grid.com/react-data-grid/scrolling-performance/
+        // Since mlflow uses "@ag-grid-community/react": "^25.0.0"
+        // there seems to be an advantage of avoiding React components
+        // for cell formatting.
+        {
+          headerName: ATTRIBUTE_COLUMN_LABELS.TRIGGER,
+          field: 'trigger',
+          cellRenderer: (x) => x.value,
+          initialWidth: 80,
+        },
+        {
+          headerName: ATTRIBUTE_COLUMN_LABELS.BRANCH,
+          field: 'branch',
+          initialWidth: 100,
+        },
+        {
           headerName: ATTRIBUTE_COLUMN_LABELS.USER,
           field: 'user',
           sortable: true,
@@ -212,21 +240,9 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
           cellStyle,
         },
         {
-          headerName: ATTRIBUTE_COLUMN_LABELS.SOURCE,
-          field: 'source',
-          initialWidth: 200,
-          cellRenderer: 'sourceCellRenderer',
-          sortable: true,
-          headerComponentParams: {
-            ...commonSortOrderProps,
-            canonicalSortKey: ATTRIBUTE_COLUMN_SORT_KEY.SOURCE,
-            computedStylesOnSortKey: headerStyle,
-          },
-          cellStyle,
-        },
-        {
           headerName: ATTRIBUTE_COLUMN_LABELS.VERSION,
           field: 'version',
+          initialWidth: 70,
           cellRenderer: 'versionCellRenderer',
           sortable: true,
           headerComponentParams: {
@@ -242,7 +258,8 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
           cellRenderer: 'modelsCellRenderer',
           initialWidth: 200,
         },
-      ].filter((c) => !categorizedUncheckedKeys[COLUMN_TYPES.ATTRIBUTES].includes(c.headerName)),
+      ].filter((c) => !categorizedUncheckedKeys[COLUMN_TYPES.ATTRIBUTES].includes(c.headerName))
+      .filter((c) => Object.values(ATTRIBUTE_COLUMN_LABELS_FILTERED).includes(c.headerName)),
       {
         headerName: 'Metrics',
         children: metricKeyList.map((metricKey, i) => {
@@ -357,6 +374,8 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
         tags,
         queryParams,
         modelVersionsByRunUuid,
+        trigger: Utils.renderTrigger(runInfo.run_uuid) || '-',
+        branch: Utils.getBranch(runInfo.run_uuid) || '-',
         isParent,
         hasExpander,
         expanderOpen,

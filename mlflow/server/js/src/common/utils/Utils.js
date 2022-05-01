@@ -636,13 +636,62 @@ class Utils {
     return '';
   }
 
+  static renderTrigger(runUuid) {
+    if (process.env.HOST_STATIC_SITE) {
+      const attributes = STATIC_DATA[runUuid].metadata.attributes;
+      const ghEventName = attributes['pipeline.github.event_name'];
+
+      if (ghEventName === 'pull_request') {
+        const githubRepo = attributes['pipeline.github.repository'];
+        const prRef = attributes['pipeline.github.ref_name'];  // eg. 42/ref
+        const url = `https://github.com/${githubRepo}/pull/${prRef}`;
+
+        // see https://stackoverflow.com/a/1862219
+        const desc = 'PR' + prRef.replace(/\D/g, '');
+
+        // hover text branch -> target branch
+        const ghBaseRef = attributes['pipeline.github.base_ref'];
+        const ghHeadRef = attributes['pipeline.github.head_ref'];
+        const hoverText = `${ghHeadRef} → ${ghBaseRef}`;
+
+        return `<a href=${url} target='_blank' title='${hoverText}'>${desc}</a>`;
+      } else if (ghEventName === 'schedule') {
+        return 'Schedule';
+      } else if (ghEventName === 'push') {
+        return 'Push';
+      } else {
+        return ghEventName;
+      }
+    }
+  }
+
+  static getBranch(runUuid) {
+    if (process.env.HOST_STATIC_SITE) {
+      const attributes = STATIC_DATA[runUuid].metadata.attributes;
+      const ghEventName = attributes['pipeline.github.event_name'];
+
+      if (ghEventName === 'pull_request') {
+        return attributes['pipeline.github.head_ref'];
+      } else {
+        return attributes['pipeline.github.ref_name'];
+      }
+    }
+  }
+
   // TODO(aaron) Remove runInfo when user_id deprecation is complete.
   static getUser(runInfo, runTags) {
     if (process.env.HOST_STATIC_SITE) {
       try {
-        // for scheduled runs, this will return last person to have edited the GHA yaml.
-        return STATIC_DATA[runInfo.run_uuid].metadata.attributes["pipeline.github.actor"];
-      } catch(err) {
+        const attributes = STATIC_DATA[runInfo.run_uuid].metadata.attributes;
+        const ghEventName = attributes['pipeline.github.event_name'];
+
+        if (ghEventName !== 'schedule') {
+          // Do not return actor for scheduled runs. In this case, the actor
+          // is the last person to modify the gha yaml definition. See
+          // https://github.community/t/who-will-be-the-github-actor-when-a-workflow-runs-on-a-schedule/17369
+          return attributes['pipeline.github.actor'];
+        }
+      } catch (err) {
         return 'unknown';
       }
     } else {
@@ -664,7 +713,7 @@ class Utils {
     if (!!gitSha && !!githubRepo) {
       const linkString = shortVersion ? gitSha.substring(0, 6) : gitSha;
       const url = `https://github.com/${githubRepo}/commit/${gitSha}`;
-      return <a href={url} target='_top'>{linkString}</a>;
+      return <a href={url} target='_top' title='git commit sha'>{linkString}</a>;
     }
   }
 

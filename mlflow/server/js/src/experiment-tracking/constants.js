@@ -31,8 +31,8 @@ function getAttributeColumnLabels(addStaticSiteColumns, addNonStaticSiteColumns)
 export const ATTRIBUTE_COLUMN_LABELS = getAttributeColumnLabels(true, true);
 
 // filtered attribute columns:
-//  - include MODELS on-nonstatic sites
-//  - include TRIGGER on static sites
+//  - include MODELS to nonstatic sites
+//  - include TRIGGER+BRANCH to static sites
 export const ATTRIBUTE_COLUMN_LABELS_FILTERED = (process.env.HOST_STATIC_SITE
   ? getAttributeColumnLabels(true, false)
   : getAttributeColumnLabels(false, true)

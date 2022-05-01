@@ -686,9 +686,8 @@ class Utils {
         const ghEventName = attributes['pipeline.github.event_name'];
 
         if (ghEventName !== 'schedule') {
-          // Do not return after for scheduled runs. The actor would be last person to modify
-          // gha yaml definition.
-          // See
+          // Do not return actor for scheduled runs. In this case, the actor
+          // is the last person to modify the gha yaml definition. See
           // https://github.community/t/who-will-be-the-github-actor-when-a-workflow-runs-on-a-schedule/17369
           return attributes['pipeline.github.actor'];
         }

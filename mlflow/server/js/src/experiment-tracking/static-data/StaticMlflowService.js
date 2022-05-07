@@ -175,7 +175,8 @@ const reformatEntry = (runId, entry, experimentId) => {
   if (!!entry.metadata.logged_values) {
     const log_kv = (k, v) => {
       if (Number(v) !== v) {
-        throw new Error(`Too complex logged value ${k}=${v}`);
+        console.log(`Skipping too complex logged value ${k}=${v}`);
+        return;
       }
 
       result.data.metrics.push({
@@ -199,7 +200,7 @@ const reformatEntry = (runId, entry, experimentId) => {
           log_kv(k + "=" + idx, x);
         }
       } else {
-        throw new Error(`Too complex logged value ${k}=${v}`);
+        console.log(`Skipping too complex logged value ${k}=${v}`);
       }
     });
   }

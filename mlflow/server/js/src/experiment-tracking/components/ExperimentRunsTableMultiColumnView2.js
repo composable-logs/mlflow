@@ -259,7 +259,8 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
           initialWidth: 200,
         },
       ].filter((c) => !categorizedUncheckedKeys[COLUMN_TYPES.ATTRIBUTES].includes(c.headerName))
-      .filter((c) => Object.values(ATTRIBUTE_COLUMN_LABELS_FILTERED).includes(c.headerName)),
+      // note: checkbox column would disappear without "|| !c.headerName" since it has no headerName
+      .filter((c) => Object.values(ATTRIBUTE_COLUMN_LABELS_FILTERED).includes(c.headerName) || !c.headerName),
       {
         headerName: 'Metrics',
         children: metricKeyList.map((metricKey, i) => {

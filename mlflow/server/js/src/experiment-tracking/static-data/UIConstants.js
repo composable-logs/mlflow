@@ -3,13 +3,14 @@
 import React from 'react';
 
 export const DataBacklinkFooter = <div
-    style={{ width: "65%", margin: "0 auto", color: "rgba(0, 0, 0, 0.45)" }}>
-    This is a static web site built using a modified version of mlflow that generates
-    static web sites. The site's UI has dynamic elements, but there is no backend with
-    a database. After the assets are built they can be served from a static web host
-    service (like eg. Github Pages). For more details, see main repo
+    style={{ width: "65%", margin: "0 auto", color: "rgba(0, 0, 0, 0.45)", "padding-bottom": "20px" }}>
+    <p>This is a static site built using a modified version of MLflow that generates
+    static web sites. The output has dynamic elements, but there is no api backend or
+    database. Thus, after the site has been built it can be served from a static web host
+    service (like eg. Github Pages). For more details, see the main repo
     <b> <a href="https://github.com/pynb-dag-runner/pynb-dag-runner">pynb-dag-runner</a> </b>
     (open source).
+    </p>
 </div>;
 
 /**

@@ -72,7 +72,7 @@ export default class ExperimentViewUtil {
     const CellComponent = `${cellType}`;
     const user = Utils.getUser(runInfo, tags);
     const queryParams = window.location && window.location.search ? window.location.search : '';
-    const sourceType = Utils.renderSource(tags, queryParams);
+    const sourceType = Utils.renderSource(tags, queryParams, runInfo.run_uuid);
     const { status, start_time: startTime, end_time: endTime } = runInfo;
     const duration = Utils.getDuration(startTime, endTime);
     const runName = Utils.getRunName(tags);

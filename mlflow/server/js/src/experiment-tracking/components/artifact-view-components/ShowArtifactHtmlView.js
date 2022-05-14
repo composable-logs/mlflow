@@ -54,9 +54,8 @@ class ShowArtifactHtmlView extends Component {
           url=''
           src={this.getBlobURL(this.state.html, 'text/html')}
           width='100%'
-          height='500px'
           id='html'
-          className='html-iframe'
+          className='artifact-html-iframe'
           display='block'
           position='relative'
           sandbox='allow-scripts'

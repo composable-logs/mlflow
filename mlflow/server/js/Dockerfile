@@ -14,9 +14,6 @@ FROM ubuntu:20.04
 #  - https://github.com/nodesource/distributions#debinstall; \
 #
 
-WORKDIR /server_js
-ADD package.json /server_js
-
 ENV DEBIAN_FRONTEND "noninteractive"
 
 RUN apt-get update --quiet -y && \
@@ -28,5 +25,4 @@ RUN apt-get update --quiet -y && \
         ca-certificates && \
     curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
     apt-get update --quiet -y && \
-    apt-get install --quiet -y nodejs && \
-    npm --no-progress install
+    apt-get install --quiet -y nodejs

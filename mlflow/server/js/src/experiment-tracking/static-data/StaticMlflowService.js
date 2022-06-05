@@ -11,29 +11,47 @@ const one = (xs) => {
   }
 };
 
-// map eg "0x11110000bbbbaaaa" -> "ingestion.py"
-const TASK_RUNID_TO_TASK_SOURCE_NAME = new Map(
+const getTaskId = (entry) => {
+  // The below logic implements:
+  //   "notebooks/ingest.py" -> "ingest"
+  //
+  // This could potentially be overwritten with "taskId" field etc in the entry dict.
+  const notebookName = entry["metadata"]["attributes"]["task.notebook"];
+  const defaultTaskId = notebookName.split("/").at(-1).replace(/.py/g, "")
+  return defaultTaskId
+};
+
+const ALL_PIPELINE_RUNS_NAME = "All pipeline runs";
+const ALL_PIPELINE_RUNS_ID = "all-pipelines-runs";
+
+const LOOKUP_IDX_TO_TASK_SOURCE_NAME = (() => {
+  // Note: keys/values in Maps are ordered in order of insertion
+  const result1 = new Map();
+  result1.set(ALL_PIPELINE_RUNS_ID, ALL_PIPELINE_RUNS_NAME);
+
+  const result2 = new Map();
   Object.entries(STATIC_DATA)
-    .filter(([k, v]) => v.type === "task")
-    .map(([k, v]) => [k, v["metadata"]["attributes"]["task.notebook"]])
-);
+    .filter(([runId, entry]) => entry.type === "task")
+    .forEach(([runId, entry]) => {
+      const entryExperimentId = getTaskId(entry);
+      if (!result2.has(entryExperimentId)) {
+        result2.set(entryExperimentId, entry["metadata"]["attributes"]["task.notebook"]);
+      }
+  });
 
-// List ML Flow experiments;
-//  - 1st entry "All pipeline runs", list pipeline runs with task-runs as sub-entries
-//  - after that list all notebooks eg ["ingestion.py", "eda.py", "train.py", "evaluate.py"]
-const TASK_SOURCE_NAMES = ["All pipeline runs"].concat(
-  [...new Set(TASK_RUNID_TO_TASK_SOURCE_NAME.values())]
-);
+  // Sort by task names
+  // See: https://stackoverflow.com/a/51242261
+  const result2Sorted = new Map([...result2].sort(([k1, v1], [k2, v2]) => v1 >= v2))
 
-const LOOKUP_TASK_SOURCE_NAME_TO_IDX = new Map([...TASK_SOURCE_NAMES.entries()].map(([idx, x]) => [x, "" + idx]));
-const LOOKUP_IDX_TO_TASK_SOURCE_NAME = new Map([...TASK_SOURCE_NAMES.entries()].map(([idx, x]) => ["" + idx, x]));
+  return new Map([...result1, ...result2Sorted]);
+})();
+
+const LOOKUP_TASK_SOURCE_NAME_TO_IDX = new Map([...LOOKUP_IDX_TO_TASK_SOURCE_NAME.entries()].map(([k, v]) => [v, k]));
 
 const STATIC_EXPERIMENTS = (() => {
   var experiments = [];
 
-  TASK_SOURCE_NAMES.forEach(sourceName => {
-    const experimentId = LOOKUP_TASK_SOURCE_NAME_TO_IDX.get(sourceName);
-
+  for (const [experimentId, sourceName] of LOOKUP_IDX_TO_TASK_SOURCE_NAME.entries()) {
     const tasksDescription = "Task runs grouped by task name";
     const pipelinesDescription = "List of pipeline runs with task-runs as sub-entries";
 
@@ -45,12 +63,12 @@ const STATIC_EXPERIMENTS = (() => {
         lifecycle_stage: 'active',
         tags: [{
           key: 'mlflow.note.content',
-          value: (experimentId === "0" ? pipelinesDescription : tasksDescription),
+          value: (experimentId === ALL_PIPELINE_RUNS_ID ? pipelinesDescription : tasksDescription),
         },
         ],
       },
     );
-  });
+  }
 
   return { experiments: experiments };
 })();
@@ -284,12 +302,12 @@ export class StaticMlflowService {
 
     var result;
 
-    if ((experiment_ids.length === 1) && one(experiment_ids) === "0") {
-      // Return all pipeline runs run individual runs as children
+    if ((experiment_ids.length === 1) && one(experiment_ids) === ALL_PIPELINE_RUNS_ID) {
+      // Return all pipeline runs with individual task runs as children
 
       result = [];
       for (const pipelineId of ALL_PIPELINE_RUN_IDS) {
-        const pipelineEntry = reformatEntry(pipelineId, STATIC_DATA[pipelineId], "0")
+        const pipelineEntry = reformatEntry(pipelineId, STATIC_DATA[pipelineId], ALL_PIPELINE_RUNS_ID)
 
         result.push(pipelineEntry);
 
@@ -305,7 +323,7 @@ export class StaticMlflowService {
           // A solution would be to preface runID:s with prefix depending on use,
           // like eg. "list-<run-id>" and "exp-<run-id>", but this also seems to
           // work.
-          result.push(reformatEntry(childId, STATIC_DATA[childId], "0"));
+          result.push(reformatEntry(childId, STATIC_DATA[childId], ALL_PIPELINE_RUNS_ID));
         }
       }
     } else {

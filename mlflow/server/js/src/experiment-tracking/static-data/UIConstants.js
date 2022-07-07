@@ -7,9 +7,9 @@ export const DataBacklinkFooter = <div
     <p>This is a static site built using a modified version of MLflow that generates
     static web sites. The output has dynamic elements, but there is no api backend or
     database. Thus, after the site has been built it can be served from a static web host
-    service (like eg. Github Pages). For more details, see the main repo
-    <b> <a href="https://github.com/pynb-dag-runner/pynb-dag-runner">pynb-dag-runner</a> </b>
-    (open source).
+    service (like eg. Github Pages). For more details, please see the pynb-dag-runner 
+    (open source) framework
+    <b> <a href="https://pynb-dag-runner.github.io/pynb-dag-runner/">documentation site</a> </b>.
     </p>
 </div>;
 

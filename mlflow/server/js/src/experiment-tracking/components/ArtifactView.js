@@ -273,27 +273,27 @@ export class ArtifactViewImpl extends Component {
       // This is only available after an API call, and may not be available when
       // `initialSelectedArtifactPath` is set.
       if ("notebook.html" in this.props.artifactNode.children) {
-        this.setSelectedArtifactPath(this.props.artifactNode, "notebook.html")
+        this.setSelectedArtifactPath("notebook.html")
       } else if ("run.json" in this.props.artifactNode.children) {
-        this.setSelectedArtifactPath(this.props.artifactNode, "run.json")
+        this.setSelectedArtifactPath("run.json")
       } else if ("pipeline.json" in this.props.artifactNode.children) {
-        this.setSelectedArtifactPath(this.props.artifactNode, "pipeline.json")
+        this.setSelectedArtifactPath("pipeline.json")
       }
     } else {
       // set path provided in url
       if (this.props.initialSelectedArtifactPath) {
-        this.setSelectedArtifactPath(this.props.artifactNode, this.props.initialSelectedArtifactPath)
+        this.setSelectedArtifactPath(this.props.initialSelectedArtifactPath)
       }
     }
   }
 
-  setSelectedArtifactPath(artifactNode, artifactPath) {
+  setSelectedArtifactPath(artifactPath) {
     const artifactPathParts = artifactPath.split('/');
     if (artifactPathParts) {
       try {
         // Check if valid artifactId was supplied in URL. If not, don't select
         // or expand anything.
-        ArtifactUtils.findChild(artifactNode, artifactPath);
+        ArtifactUtils.findChild(this.props.artifactNode, artifactPath);
       } catch (err) {
         console.error(err);
         return;

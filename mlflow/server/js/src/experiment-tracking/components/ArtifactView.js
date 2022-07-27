@@ -266,30 +266,51 @@ export class ArtifactViewImpl extends Component {
   }
 
   componentDidMount() {
-    if (this.props.initialSelectedArtifactPath) {
-      const artifactPathParts = this.props.initialSelectedArtifactPath.split('/');
-      if (artifactPathParts) {
-        try {
-          // Check if valid artifactId was supplied in URL. If not, don't select
-          // or expand anything.
-          ArtifactUtils.findChild(this.props.artifactNode, this.props.initialSelectedArtifactPath);
-        } catch (err) {
-          console.error(err);
-          return;
-        }
+    if (process.env.HOST_STATIC_SITE) {
+      // Note that here the initially selected artifact depends on what files have
+      // been logged.
+      //
+      // This is only available after an API call, and may not be available when
+      // `initialSelectedArtifactPath` is set.
+      if ("notebook.html" in this.props.artifactNode.children) {
+        this.setSelectedArtifactPath("notebook.html")
+      } else if ("run.json" in this.props.artifactNode.children) {
+        this.setSelectedArtifactPath("run.json")
+      } else if ("pipeline.json" in this.props.artifactNode.children) {
+        this.setSelectedArtifactPath("pipeline.json")
       }
-      let pathSoFar = '';
-      const toggledArtifactState = {
-        activeNodeId: this.props.initialSelectedArtifactPath,
-        toggledNodeIds: {},
-      };
-      artifactPathParts.forEach((part) => {
-        pathSoFar += part;
-        toggledArtifactState['toggledNodeIds'][pathSoFar] = true;
-        pathSoFar += '/';
-      });
-      this.setArtifactState(toggledArtifactState);
+    } else {
+      // set path provided in url
+      if (this.props.initialSelectedArtifactPath) {
+        this.setSelectedArtifactPath(this.props.initialSelectedArtifactPath)
+      }
     }
+  }
+
+  setSelectedArtifactPath(artifactPath) {
+    const artifactPathParts = artifactPath.split('/');
+    if (artifactPathParts) {
+      try {
+        // Check if valid artifactId was supplied in URL. If not, don't select
+        // or expand anything.
+        ArtifactUtils.findChild(this.props.artifactNode, artifactPath);
+      } catch (err) {
+        console.error(err);
+        return;
+      }
+    }
+
+    let pathSoFar = '';
+    const toggledArtifactState = {
+      activeNodeId: artifactPath,
+      toggledNodeIds: {},
+    };
+    artifactPathParts.forEach((part) => {
+      pathSoFar += part;
+      toggledArtifactState['toggledNodeIds'][pathSoFar] = true;
+      pathSoFar += '/';
+    });
+    this.setArtifactState(toggledArtifactState);
   }
 
   setArtifactState(artifactState) {

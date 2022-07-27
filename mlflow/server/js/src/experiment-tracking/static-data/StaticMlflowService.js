@@ -119,7 +119,7 @@ const reformatEntry = (runId, entry, experimentId) => {
       status: (isPipeline || isSucess) ? "FINISHED" : "FAILED",
       start_time: entry.metadata.start_time,
       end_time: entry.metadata.end_time,
-      artifact_uri: "artifact_uri",
+      artifact_uri: entry.artifacts_location,
       lifecycle_stage: "active",
       run_id: runId
     },

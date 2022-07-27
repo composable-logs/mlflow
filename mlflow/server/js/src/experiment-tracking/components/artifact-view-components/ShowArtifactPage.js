@@ -1,4 +1,3 @@
-import { STATIC_DATA } from '../../static-data/StaticData';
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import {
@@ -58,19 +57,46 @@ class ShowArtifactPage extends Component {
         return getFileTooLargeView();
       } else if (normalizedExtension) {
         if (IMAGE_EXTENSIONS.has(normalizedExtension.toLowerCase())) {
-          return <ShowArtifactImageView runUuid={this.props.runUuid} path={this.props.path} />;
+          return (
+            <ShowArtifactImageView
+              runUuid={this.props.runUuid}
+              path={this.props.path}
+              artifactRootUri={this.props.artifactRootUri}
+            />
+          );
         } else if (TEXT_EXTENSIONS.has(normalizedExtension.toLowerCase())) {
-          return <ShowArtifactTextView runUuid={this.props.runUuid} path={this.props.path} />;
+          return (
+            <ShowArtifactTextView
+              runUuid={this.props.runUuid}
+              path={this.props.path}
+              artifactRootUri={this.props.artifactRootUri}
+            />
+          );
         } else if (MAP_EXTENSIONS.has(normalizedExtension.toLowerCase())) {
+          if (process.env.HOST_STATIC_SITE) {
+            throw new Error("map-artifacts not supported in static mode");
+          }
           return <ShowArtifactMapView runUuid={this.props.runUuid} path={this.props.path} />;
         } else if (HTML_EXTENSIONS.has(normalizedExtension.toLowerCase())) {
-          return <ShowArtifactHtmlView runUuid={this.props.runUuid} path={this.props.path} />;
+          return (
+            <ShowArtifactHtmlView
+              runUuid={this.props.runUuid}
+              path={this.props.path}
+              artifactRootUri={this.props.artifactRootUri}
+            />
+          );
         } else if (PDF_EXTENSIONS.has(normalizedExtension.toLowerCase())) {
+          if (process.env.HOST_STATIC_SITE) {
+            throw new Error("pdf-artifacts not supported in static mode");
+          }
           return <ShowArtifactPdfView runUuid={this.props.runUuid} path={this.props.path} />;
         } else if (
           this.props.runTags &&
           getLoggedModelPathsFromTags(this.props.runTags).includes(normalizedExtension)
         ) {
+          if (process.env.HOST_STATIC_SITE) {
+            throw new Error("model-artifacts not supported in static mode");
+          }
           return (
             <ShowArtifactLoggedModelView
               runUuid={this.props.runUuid}
@@ -140,9 +166,9 @@ const getFileTooLargeView = () => {
   );
 };
 
-export const getSrc = (path, runUuid) => {
+export const getSrc = (path, runUuid, artifactRootUri) => {
   if (process.env.HOST_STATIC_SITE) {
-    return `pipeline-artifacts/${STATIC_DATA[runUuid].artifacts_location}/${path}`;
+    return `pipeline-artifacts/${artifactRootUri}/${path}`;
   } else {
     const basePath = 'get-artifact';
     return `${basePath}?path=${encodeURIComponent(path)}&run_uuid=${encodeURIComponent(runUuid)}`;

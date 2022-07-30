@@ -252,12 +252,19 @@ export class StaticMlflowService {
     }))
   }
 
+  static getRunRawData(run_id) {
+    return STATIC_DATA[run_id];
+  }
+
   static getRun({
     run_id
   }) {
     return new Promise((resolve, reject) => {
       resolve(
-        { run: reformatEntry(run_id, STATIC_DATA[run_id], null) }
+        {
+          run: reformatEntry(
+            run_id, StaticMlflowService.getRunRawData(run_id), null)
+        }
       )
     });
   }

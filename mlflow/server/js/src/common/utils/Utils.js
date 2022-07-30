@@ -12,7 +12,7 @@ import { message } from 'antd';
 import _ from 'lodash';
 import { ErrorCodes, SupportPageUrl } from '../constants';
 import { FormattedMessage } from 'react-intl';
-import { STATIC_DATA } from '../../experiment-tracking/static-data/StaticData';
+import { StaticMlflowService } from '../../experiment-tracking/static-data/StaticMlflowService'
 
 message.config({
   maxCount: 1,
@@ -373,7 +373,7 @@ class Utils {
   }
 
   static renderSourceStaticGH(runUuid) {
-    const runEntry = STATIC_DATA[runUuid];
+    const runEntry = StaticMlflowService.getRunRawData(runUuid);
     const runAttributes = runEntry.metadata.attributes;
 
     var desc;
@@ -638,7 +638,7 @@ class Utils {
 
   static renderTrigger(runUuid) {
     if (process.env.HOST_STATIC_SITE) {
-      const attributes = STATIC_DATA[runUuid].metadata.attributes;
+      const attributes = StaticMlflowService.getRunRawData(runUuid).metadata.attributes;
       const ghEventName = attributes['pipeline.github.event_name'];
 
       if (ghEventName === 'pull_request') {
@@ -667,7 +667,7 @@ class Utils {
 
   static getBranch(runUuid) {
     if (process.env.HOST_STATIC_SITE) {
-      const attributes = STATIC_DATA[runUuid].metadata.attributes;
+      const attributes = StaticMlflowService.getRunRawData(runUuid).metadata.attributes;
       const ghEventName = attributes['pipeline.github.event_name'];
 
       if (ghEventName === 'pull_request') {
@@ -682,7 +682,7 @@ class Utils {
   static getUser(runInfo, runTags) {
     if (process.env.HOST_STATIC_SITE) {
       try {
-        const attributes = STATIC_DATA[runInfo.run_uuid].metadata.attributes;
+        const attributes = StaticMlflowService.getRunRawData(runInfo.run_uuid).metadata.attributes;
         const ghEventName = attributes['pipeline.github.event_name'];
 
         if (ghEventName !== 'schedule') {
@@ -705,7 +705,7 @@ class Utils {
   }
 
   static renderVersionStaticGH(shortVersion, runUuid) {
-    const attributes = STATIC_DATA[runUuid].metadata.attributes;
+    const attributes = StaticMlflowService.getRunRawData(runUuid).metadata.attributes;
 
     const gitSha = attributes["pipeline.github.sha"];
     const githubRepo = attributes["pipeline.github.repository"];

@@ -45,11 +45,13 @@ class App extends Component {
       staticDataLoaderState: StaticDataLoader.state
     };
 
-    StaticDataLoader.loaderPromise.then((value) => {
+    const stateChangeHandler = () => {
       this.setState({
         staticDataLoaderState: StaticDataLoader.state
       });
-    });
+    };
+
+    StaticDataLoader.loaderPromise.then(stateChangeHandler);
   }
 
   render() {
@@ -156,6 +158,8 @@ class App extends Component {
         </div>
       </Router>);
     } else if (state === "FAILED") {
+      // todo: this will not currently render even when there are errors
+      // with static asset loading.
       return (<span>Failed to load data</span>);
     } else {
       throw new Error("Unknown state while loading static data");

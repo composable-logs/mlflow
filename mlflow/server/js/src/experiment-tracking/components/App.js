@@ -38,27 +38,27 @@ const classNames = {
 };
 
 class App extends Component {
-
   constructor(props) {
     super(props);
-
-    console.log("StaticDataLoader", StaticDataLoader.state)
 
     this.state = {
       staticDataLoaderState: StaticDataLoader.state
     };
 
     StaticDataLoader.loaderPromise.then((value) => {
-      console.log("***** receivedData ******")
       this.setState({
         staticDataLoaderState: StaticDataLoader.state
       });
-    })
+    });
   }
 
   render() {
-    const uiAfterDataHasLoaded = (
-      <Router>
+    const state = this.state.staticDataLoaderState
+
+    if (state === "LOADING") {
+      return (<span> Data loading.... Please wait</span>);
+    } else if (state === "LOADED") {
+      return (<Router>
         <div style={{ height: '100vh' }}>
           <ErrorModal />
           {process.env.HIDE_HEADER === 'true' ? null : (
@@ -148,15 +148,11 @@ class App extends Component {
             </Switch>
           </AppErrorBoundary>
         </div>
-      </Router>
-    );
-
-    const state = this.state.staticDataLoaderState
-
-    if (state === "LOADED") {
-      return uiAfterDataHasLoaded;
+      </Router>);
+    } else if (state === "FAILED") {
+      return (<span>Failed to load data</span>);
     } else {
-      return (<span> Data loading.... Please wait</span>);
+      throw new Error("Unknown state while loading static data");
     }
   }
 }

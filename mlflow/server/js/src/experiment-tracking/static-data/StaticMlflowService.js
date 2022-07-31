@@ -73,29 +73,6 @@ const STATIC_EXPERIMENTS = (() => {
   return { experiments: experiments };
 })();
 
-// Array of ID:s for pipeline runs
-const ALL_PIPELINE_RUN_IDS = [...Object.entries(STATIC_DATA)
-  .filter(([runId, v]) => v.type === "pipeline")
-  .map(([runId, v]) => runId)
-];
-
-const PIPELINE_ID_TO_CHILDREN_RUN_IDS = (() => (
-  new Map(ALL_PIPELINE_RUN_IDS.map(pipelineId => {
-    const result = [];
-
-    Object.entries(STATIC_DATA).forEach(([vRunId, v]) => {
-      if ((v.type === "task") && (v.parent_id === pipelineId)) {
-        Object.entries(STATIC_DATA).forEach(([wRunId, w]) => {
-          if ((w.type === "run") && (w.parent_id === vRunId)) {
-            result.push(wRunId);
-          }
-        });
-      }
-    });
-    return [pipelineId, result];
-  }))
-))();
-
 const reformatEntry = (runId, entry, experimentId) => {
   const isPipeline = entry.type === "pipeline";
 
@@ -235,8 +212,10 @@ const reformatEntry = (runId, entry, experimentId) => {
 };
 
 class StaticDataLoaderClass {
-  // static data to show in UI
-  LOADED_STATIC_DATA = undefined;
+  // -- static data to show in UI --
+  LOADED_STATIC_DATA;
+  ALL_PIPELINE_RUN_IDS;
+  PIPELINE_ID_TO_CHILDREN_RUN_IDS;
 
   // promise (for attaching callbacks)
   loaderPromise
@@ -245,18 +224,57 @@ class StaticDataLoaderClass {
   state = "LOADING NOT STARTED"
 
   constructor() {
-    console.log("startLoadingData:");
     this.loaderPromise = getArtifactContent('./data.json');
     this.state = "LOADING";
 
-    const self = this;
+    //
+    // Note:
+    // Before data has been loaded, the UI will just be a load-screen like:
+    //
+    //     "Please wait. Loading ..."
+    //
+    // However, the main MLFlow UI will still start to initialize and it
+    // will start to query data immediately. Thus, before data has arrived
+    // we initially just return "no data" (and we do not attempt to hide/disable
+    // the main UI while data is loading).
+    //
+    this.registerData({});
 
     this.loaderPromise.then((value) => {
-      console.log("startLoadingData: Loaded dynamic data...");
-      self.LOADED_STATIC_DATA = JSON.parse(value);
-      self.state = "LOADED";
-      console.log("startLoadingData: Done");
+      this.registerData(JSON.parse(value));
+      this.state = "LOADED";
+    }).catch((err) => {
+      this.state = "FAILED";
     });
+  }
+
+  registerData(staticData) {
+    this.LOADED_STATIC_DATA = staticData
+
+    // --- Process loaded data ---
+
+    // Array of ID:s for pipeline runs
+    this.ALL_PIPELINE_RUN_IDS = [...Object.entries(this.LOADED_STATIC_DATA)
+      .filter(([runId, v]) => v.type === "pipeline")
+      .map(([runId, v]) => runId)
+    ];
+
+    this.PIPELINE_ID_TO_CHILDREN_RUN_IDS = (() => (
+      new Map(this.ALL_PIPELINE_RUN_IDS.map(pipelineId => {
+        const result = [];
+
+        Object.entries(this.LOADED_STATIC_DATA).forEach(([vRunId, v]) => {
+          if ((v.type === "task") && (v.parent_id === pipelineId)) {
+            Object.entries(this.LOADED_STATIC_DATA).forEach(([wRunId, w]) => {
+              if ((w.type === "run") && (w.parent_id === vRunId)) {
+                result.push(wRunId);
+              }
+            });
+          }
+        });
+        return [pipelineId, result];
+      }))
+    ))();
   }
 }
 
@@ -341,12 +359,12 @@ export class StaticMlflowService {
       // Return all pipeline runs with individual task runs as children
 
       result = [];
-      for (const pipelineId of ALL_PIPELINE_RUN_IDS) {
+      for (const pipelineId of StaticDataLoader.ALL_PIPELINE_RUN_IDS) {
         const pipelineEntry = reformatEntry(pipelineId, STATIC_DATA[pipelineId], ALL_PIPELINE_RUNS_ID)
 
         result.push(pipelineEntry);
 
-        for (const childId of PIPELINE_ID_TO_CHILDREN_RUN_IDS.get(pipelineId)) {
+        for (const childId of StaticDataLoader.PIPELINE_ID_TO_CHILDREN_RUN_IDS.get(pipelineId)) {
           // Note: here we are rewriting the ExperimentId for run:s when shown in
           // "All Experiment" list. Otherwise, they will not show up in UI.
           //

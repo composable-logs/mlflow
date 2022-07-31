@@ -1,6 +1,3 @@
-import {
-  STATIC_DATA
-} from './StaticData';
 import { getArtifactContent } from '../../common/utils/ArtifactUtils'
 
 const one = (xs) => {
@@ -149,10 +146,10 @@ const reformatEntry = (runId, entry, experimentId) => {
   }
 
   if (entry.type === "run") {
-    const parentTaskId = STATIC_DATA[runId].parent_id;
+    const parentTaskId = StaticDataLoader.LOADED_STATIC_DATA[runId].parent_id;
     result.data.tags.push({
       key: "mlflow.parentRunId",
-      value: STATIC_DATA[parentTaskId].parent_id
+      value: StaticDataLoader.LOADED_STATIC_DATA[parentTaskId].parent_id
     });
   }
 
@@ -299,7 +296,7 @@ export class StaticMlflowService {
   }
 
   static getRunRawData(run_id) {
-    return STATIC_DATA[run_id];
+    return StaticDataLoader.LOADED_STATIC_DATA[run_id];
   }
 
   static getRun({
@@ -319,7 +316,7 @@ export class StaticMlflowService {
     run_uuid,
     path
   }) {
-    const entry = STATIC_DATA[run_uuid];
+    const entry = StaticDataLoader.LOADED_STATIC_DATA[run_uuid];
     var result;
 
     if (!!entry && !!entry.artifacts) {
@@ -360,7 +357,11 @@ export class StaticMlflowService {
 
       result = [];
       for (const pipelineId of StaticDataLoader.ALL_PIPELINE_RUN_IDS) {
-        const pipelineEntry = reformatEntry(pipelineId, STATIC_DATA[pipelineId], StaticDataLoader.ALL_PIPELINE_RUNS_ID)
+        const pipelineEntry = reformatEntry(
+          pipelineId,
+          StaticDataLoader.LOADED_STATIC_DATA[pipelineId],
+          StaticDataLoader.ALL_PIPELINE_RUNS_ID
+        );
 
         result.push(pipelineEntry);
 
@@ -376,7 +377,13 @@ export class StaticMlflowService {
           // A solution would be to preface runID:s with prefix depending on use,
           // like eg. "list-<run-id>" and "exp-<run-id>", but this also seems to
           // work.
-          result.push(reformatEntry(childId, STATIC_DATA[childId], StaticDataLoader.ALL_PIPELINE_RUNS_ID));
+          result.push(
+            reformatEntry(
+              childId,
+              StaticDataLoader.LOADED_STATIC_DATA[childId],
+              StaticDataLoader.ALL_PIPELINE_RUNS_ID
+            )
+          );
         }
       }
     } else {
@@ -385,14 +392,14 @@ export class StaticMlflowService {
       const validSources = new Set(experiment_ids.map(eid => StaticDataLoader.LOOKUP_IDX_TO_TASK_SOURCE_NAME.get(eid)));
 
       // get parent Task id:s whose runs should be shown
-      const taskIds = new Set(Object.entries(STATIC_DATA)
+      const taskIds = new Set(Object.entries(StaticDataLoader.LOADED_STATIC_DATA)
         .filter(([runId, v]) => v.type === "task")
         .filter(([runId, v]) => validSources.has(v["metadata"]["attributes"]["task.notebook"]))
         .map(([runId, v]) => runId)
       );
 
       // find all children (run:s) under these tasks
-      result = [...Object.entries(STATIC_DATA)
+      result = [...Object.entries(StaticDataLoader.LOADED_STATIC_DATA)
         .filter(([runId, v]) => v.type === "run")
         .filter(([runId, v]) => taskIds.has(v["parent_id"]))
         .map(([runId, v]) => reformatEntry(runId, v, expId))

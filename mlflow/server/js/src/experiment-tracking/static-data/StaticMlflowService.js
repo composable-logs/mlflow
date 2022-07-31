@@ -316,7 +316,7 @@ export class StaticMlflowService {
     run_uuid,
     path
   }) {
-    const entry = StaticDataLoader.LOADED_STATIC_DATA[run_uuid];
+    const entry = StaticMlflowService.getRunRawData(run_uuid);
     var result;
 
     if (!!entry && !!entry.artifacts) {
@@ -359,7 +359,7 @@ export class StaticMlflowService {
       for (const pipelineId of StaticDataLoader.ALL_PIPELINE_RUN_IDS) {
         const pipelineEntry = reformatEntry(
           pipelineId,
-          StaticDataLoader.LOADED_STATIC_DATA[pipelineId],
+          StaticMlflowService.getRunRawData(pipelineId),
           StaticDataLoader.ALL_PIPELINE_RUNS_ID
         );
 
@@ -380,7 +380,7 @@ export class StaticMlflowService {
           result.push(
             reformatEntry(
               childId,
-              StaticDataLoader.LOADED_STATIC_DATA[childId],
+              StaticMlflowService.getRunRawData(childId),
               StaticDataLoader.ALL_PIPELINE_RUNS_ID
             )
           );

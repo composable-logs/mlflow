@@ -177,7 +177,6 @@ class StaticDataLoaderClass {
 
   constructor() {
     this.loaderPromise = getArtifactContent('./ui_static_data.json');
-    this.state = "LOADING";
 
     //
     // Note:
@@ -190,17 +189,17 @@ class StaticDataLoaderClass {
     // we initially just return "no data" (and we do not attempt to hide/disable
     // the main UI while data is loading).
     //
-    this.registerData({});
+    this.registerData("LOADING", {});
 
     this.loaderPromise.then((value) => {
-      this.registerData(JSON.parse(value));
-      this.state = "LOADED";
+      this.registerData("LOADED", JSON.parse(value));
     }).catch((err) => {
-      this.state = "FAILED";
+      this.registerData("FAILED", {});
     });
   }
 
-  registerData(staticData) {
+  registerData(state, staticData) {
+    this.state = state;
     this.LOADED_STATIC_DATA = staticData
 
     this.ALL_PIPELINE_RUN_IDS = [...Object.entries(this.LOADED_STATIC_DATA)

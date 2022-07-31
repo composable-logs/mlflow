@@ -1,7 +1,4 @@
-import {
-  STATIC_DATA
-} from './StaticData';
-
+import { getArtifactContent } from '../../common/utils/ArtifactUtils'
 
 const one = (xs) => {
   if (xs.length === 1) {
@@ -21,81 +18,6 @@ const getTaskId = (entry) => {
   return defaultTaskId
 };
 
-const ALL_PIPELINE_RUNS_NAME = "All pipeline runs";
-const ALL_PIPELINE_RUNS_ID = "all-pipelines-runs";
-
-const LOOKUP_IDX_TO_TASK_SOURCE_NAME = (() => {
-  // Note: keys/values in Maps are ordered in order of insertion
-  const result1 = new Map();
-  result1.set(ALL_PIPELINE_RUNS_ID, ALL_PIPELINE_RUNS_NAME);
-
-  const result2 = new Map();
-  Object.entries(STATIC_DATA)
-    .filter(([runId, entry]) => entry.type === "task")
-    .forEach(([runId, entry]) => {
-      const entryExperimentId = getTaskId(entry);
-      if (!result2.has(entryExperimentId)) {
-        result2.set(entryExperimentId, entry["metadata"]["attributes"]["task.notebook"]);
-      }
-  });
-
-  // Sort by task names
-  // See: https://stackoverflow.com/a/51242261
-  const result2Sorted = new Map([...result2].sort(([k1, v1], [k2, v2]) => v1 >= v2))
-
-  return new Map([...result1, ...result2Sorted]);
-})();
-
-const LOOKUP_TASK_SOURCE_NAME_TO_IDX = new Map([...LOOKUP_IDX_TO_TASK_SOURCE_NAME.entries()].map(([k, v]) => [v, k]));
-
-const STATIC_EXPERIMENTS = (() => {
-  var experiments = [];
-
-  for (const [experimentId, sourceName] of LOOKUP_IDX_TO_TASK_SOURCE_NAME.entries()) {
-    const tasksDescription = "Task runs grouped by task name";
-    const pipelinesDescription = "List of pipeline runs with task-runs as sub-entries";
-
-    experiments.push(
-      {
-        experiment_id: experimentId,
-        name: sourceName,
-        artifact_location: `./mlruns/${experimentId}`,
-        lifecycle_stage: 'active',
-        tags: [{
-          key: 'mlflow.note.content',
-          value: (experimentId === ALL_PIPELINE_RUNS_ID ? pipelinesDescription : tasksDescription),
-        },
-        ],
-      },
-    );
-  }
-
-  return { experiments: experiments };
-})();
-
-// Array of ID:s for pipeline runs
-const ALL_PIPELINE_RUN_IDS = [...Object.entries(STATIC_DATA)
-  .filter(([runId, v]) => v.type === "pipeline")
-  .map(([runId, v]) => runId)
-];
-
-const PIPELINE_ID_TO_CHILDREN_RUN_IDS = (() => (
-  new Map(ALL_PIPELINE_RUN_IDS.map(pipelineId => {
-    const result = [];
-
-    Object.entries(STATIC_DATA).forEach(([vRunId, v]) => {
-      if ((v.type === "task") && (v.parent_id === pipelineId)) {
-        Object.entries(STATIC_DATA).forEach(([wRunId, w]) => {
-          if ((w.type === "run") && (w.parent_id === vRunId)) {
-            result.push(wRunId);
-          }
-        });
-      }
-    });
-    return [pipelineId, result];
-  }))
-))();
-
 const reformatEntry = (runId, entry, experimentId) => {
   const isPipeline = entry.type === "pipeline";
 
@@ -111,7 +33,7 @@ const reformatEntry = (runId, entry, experimentId) => {
   const result = {
     info: {
       run_uuid: runId,
-      experiment_id: (!!experimentId ? experimentId : LOOKUP_TASK_SOURCE_NAME_TO_IDX.get(sourceName)),
+      experiment_id: (!!experimentId ? experimentId : StaticDataLoader.LOOKUP_TASK_SOURCE_NAME_TO_IDX.get(sourceName)),
       user_id: "info.user_id",
       // TODO: pipelines-summaries should also have status in data
       // Now pipeline runs are always shown as successful (green icon) even
@@ -224,19 +146,140 @@ const reformatEntry = (runId, entry, experimentId) => {
   }
 
   if (entry.type === "run") {
-    const parentTaskId = STATIC_DATA[runId].parent_id;
+    const parentTaskId = StaticDataLoader.DATA[runId].parent_id;
     result.data.tags.push({
       key: "mlflow.parentRunId",
-      value: STATIC_DATA[parentTaskId].parent_id
+      value: StaticDataLoader.DATA[parentTaskId].parent_id
     });
   }
 
   return result;
 };
 
+class StaticDataLoaderClass {
+  // -- static data to show in UI --
+  DATA;
+  ALL_PIPELINE_RUN_IDS;
+  PIPELINE_ID_TO_CHILDREN_RUN_IDS;
+  LOOKUP_IDX_TO_TASK_SOURCE_NAME;
+  LOOKUP_TASK_SOURCE_NAME_TO_IDX;
+  STATIC_EXPERIMENTS;
+  ALL_PIPELINE_RUNS_ID = "all-pipelines-runs";
+
+  // promise (for attaching callbacks)
+  loaderPromise;
+
+  // undefined -> "LOADING" -> {"LOADED" or "FAILED"}
+  state;
+
+  constructor() {
+    this.loaderPromise = getArtifactContent('ui_static_data.json');
+
+    //
+    // Note:
+    // Before data has been loaded, the UI will just be a load-screen like:
+    //
+    //     "Please wait. Loading ..."
+    //
+    // However, the main MLFlow UI will still start to initialize and it
+    // will start to query data immediately. Thus, before data has arrived
+    // we initially just return "no data" (and we do not attempt to hide/disable
+    // the main UI while data is loading).
+    //
+    this.registerData("LOADING", {});
+
+    this.loaderPromise.then((value) => {
+      this.registerData("LOADED", JSON.parse(value));
+    }).catch((err) => {
+      this.registerData("FAILED", {});
+    });
+  }
+
+  registerData(state, staticData) {
+    this.state = state;
+    this.DATA = staticData
+
+    this.ALL_PIPELINE_RUN_IDS = [...Object.entries(this.DATA)
+      .filter(([runId, v]) => v.type === "pipeline")
+      .map(([runId, v]) => runId)
+    ];
+
+    this.PIPELINE_ID_TO_CHILDREN_RUN_IDS = (() => (
+      new Map(this.ALL_PIPELINE_RUN_IDS.map(pipelineId => {
+        const result = [];
+
+        Object.entries(this.DATA).forEach(([vRunId, v]) => {
+          if ((v.type === "task") && (v.parent_id === pipelineId)) {
+            Object.entries(this.DATA).forEach(([wRunId, w]) => {
+              if ((w.type === "run") && (w.parent_id === vRunId)) {
+                result.push(wRunId);
+              }
+            });
+          }
+        });
+        return [pipelineId, result];
+      }))
+    ))();
+
+    this.LOOKUP_IDX_TO_TASK_SOURCE_NAME = (() => {
+      // Note: keys/values in Maps are ordered in order of insertion
+      const result1 = new Map();
+
+      result1.set(this.ALL_PIPELINE_RUNS_ID, "All pipeline runs");
+
+      const result2 = new Map();
+      Object.entries(this.DATA)
+        .filter(([runId, entry]) => entry.type === "task")
+        .forEach(([runId, entry]) => {
+          const entryExperimentId = getTaskId(entry);
+          if (!result2.has(entryExperimentId)) {
+            result2.set(entryExperimentId, entry["metadata"]["attributes"]["task.notebook"]);
+          }
+      });
+
+      // Sort by task names
+      // See: https://stackoverflow.com/a/51242261
+      const result2Sorted = new Map([...result2].sort(([k1, v1], [k2, v2]) => v1 >= v2))
+
+      return new Map([...result1, ...result2Sorted]);
+    })();
+
+    this.LOOKUP_TASK_SOURCE_NAME_TO_IDX = new Map(
+      [...this.LOOKUP_IDX_TO_TASK_SOURCE_NAME.entries()].map(([k, v]) => [v, k])
+    );
+
+    this.STATIC_EXPERIMENTS = (() => {
+      var experiments = [];
+
+      for (const [experimentId, sourceName] of this.LOOKUP_IDX_TO_TASK_SOURCE_NAME.entries()) {
+        const tasksDescription = "Task runs grouped by task name";
+        const pipelinesDescription = "List of pipeline runs with task-runs as sub-entries";
+
+        experiments.push(
+          {
+            experiment_id: experimentId,
+            name: sourceName,
+            artifact_location: `./mlruns/${experimentId}`,
+            lifecycle_stage: 'active',
+            tags: [{
+              key: 'mlflow.note.content',
+              value: (experimentId === this.ALL_PIPELINE_RUNS_ID ? pipelinesDescription : tasksDescription),
+            },
+            ],
+          },
+        );
+      }
+
+      return { experiments };
+    })();
+  }
+}
+
+export const StaticDataLoader = new StaticDataLoaderClass();
+
 export class StaticMlflowService {
   static listExperiments(dummy_arg) {
-    return new Promise((resolve, reject) => resolve(STATIC_EXPERIMENTS));
+    return new Promise((resolve, reject) => resolve(StaticDataLoader.STATIC_EXPERIMENTS));
   };
 
   static getExperiment({
@@ -244,7 +287,7 @@ export class StaticMlflowService {
   }) {
     return new Promise((resolve, reject) => {
       resolve(
-        STATIC_EXPERIMENTS
+        StaticDataLoader.STATIC_EXPERIMENTS
           .experiments
           .filter((entry) => entry.experiment_id === experiment_id))
     }).then(xs => ({
@@ -253,7 +296,7 @@ export class StaticMlflowService {
   }
 
   static getRunRawData(run_id) {
-    return STATIC_DATA[run_id];
+    return StaticDataLoader.DATA[run_id];
   }
 
   static getRun({
@@ -273,7 +316,7 @@ export class StaticMlflowService {
     run_uuid,
     path
   }) {
-    const entry = STATIC_DATA[run_uuid];
+    const entry = StaticMlflowService.getRunRawData(run_uuid);
     var result;
 
     if (!!entry && !!entry.artifacts) {
@@ -309,16 +352,20 @@ export class StaticMlflowService {
 
     var result;
 
-    if ((experiment_ids.length === 1) && one(experiment_ids) === ALL_PIPELINE_RUNS_ID) {
+    if ((experiment_ids.length === 1) && one(experiment_ids) === StaticDataLoader.ALL_PIPELINE_RUNS_ID) {
       // Return all pipeline runs with individual task runs as children
 
       result = [];
-      for (const pipelineId of ALL_PIPELINE_RUN_IDS) {
-        const pipelineEntry = reformatEntry(pipelineId, STATIC_DATA[pipelineId], ALL_PIPELINE_RUNS_ID)
+      for (const pipelineId of StaticDataLoader.ALL_PIPELINE_RUN_IDS) {
+        const pipelineEntry = reformatEntry(
+          pipelineId,
+          StaticMlflowService.getRunRawData(pipelineId),
+          StaticDataLoader.ALL_PIPELINE_RUNS_ID
+        );
 
         result.push(pipelineEntry);
 
-        for (const childId of PIPELINE_ID_TO_CHILDREN_RUN_IDS.get(pipelineId)) {
+        for (const childId of StaticDataLoader.PIPELINE_ID_TO_CHILDREN_RUN_IDS.get(pipelineId)) {
           // Note: here we are rewriting the ExperimentId for run:s when shown in
           // "All Experiment" list. Otherwise, they will not show up in UI.
           //
@@ -330,23 +377,29 @@ export class StaticMlflowService {
           // A solution would be to preface runID:s with prefix depending on use,
           // like eg. "list-<run-id>" and "exp-<run-id>", but this also seems to
           // work.
-          result.push(reformatEntry(childId, STATIC_DATA[childId], ALL_PIPELINE_RUNS_ID));
+          result.push(
+            reformatEntry(
+              childId,
+              StaticMlflowService.getRunRawData(childId),
+              StaticDataLoader.ALL_PIPELINE_RUNS_ID
+            )
+          );
         }
       }
     } else {
       const expId = one(experiment_ids); // will crash if searching for more experimentId:s
 
-      const validSources = new Set(experiment_ids.map(eid => LOOKUP_IDX_TO_TASK_SOURCE_NAME.get(eid)));
+      const validSources = new Set(experiment_ids.map(eid => StaticDataLoader.LOOKUP_IDX_TO_TASK_SOURCE_NAME.get(eid)));
 
       // get parent Task id:s whose runs should be shown
-      const taskIds = new Set(Object.entries(STATIC_DATA)
+      const taskIds = new Set(Object.entries(StaticDataLoader.DATA)
         .filter(([runId, v]) => v.type === "task")
         .filter(([runId, v]) => validSources.has(v["metadata"]["attributes"]["task.notebook"]))
         .map(([runId, v]) => runId)
       );
 
       // find all children (run:s) under these tasks
-      result = [...Object.entries(STATIC_DATA)
+      result = [...Object.entries(StaticDataLoader.DATA)
         .filter(([runId, v]) => v.type === "run")
         .filter(([runId, v]) => taskIds.has(v["parent_id"]))
         .map(([runId, v]) => reformatEntry(runId, v, expId))

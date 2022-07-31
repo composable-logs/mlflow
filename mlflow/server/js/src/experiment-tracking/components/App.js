@@ -25,6 +25,8 @@ import { ModelPage } from '../../model-registry/components/ModelPage';
 import { CompareModelVersionsPage } from '../../model-registry/components/CompareModelVersionsPage';
 import { SiteHeader } from '../static-data/UIConstants';
 
+import { StaticDataLoader } from '../static-data/StaticMlflowService';
+
 const isExperimentsActive = (match, location) => {
   // eslint-disable-next-line prefer-const
   let isActive = match && !location.pathname.includes('models');
@@ -36,9 +38,35 @@ const classNames = {
 };
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      staticDataLoaderState: StaticDataLoader.state
+    };
+
+    const stateChangeHandler = () => {
+      this.setState({
+        staticDataLoaderState: StaticDataLoader.state
+      });
+    };
+
+    StaticDataLoader.loaderPromise.then(stateChangeHandler).catch(stateChangeHandler);
+  }
+
   render() {
-    return (
-      <Router>
+    const state = this.state.staticDataLoaderState
+
+    if (state === "LOADING") {
+      return (
+        <div>
+          <span>
+            Data loading.... Please wait
+          </span>
+        </div>
+      );
+    } else if (state === "LOADED") {
+      return (<Router>
         <div style={{ height: '100vh' }}>
           <ErrorModal />
           {process.env.HIDE_HEADER === 'true' ? null : (
@@ -128,8 +156,14 @@ class App extends Component {
             </Switch>
           </AppErrorBoundary>
         </div>
-      </Router>
-    );
+      </Router>);
+    } else if (state === "FAILED") {
+      // Manually test by changing static asset to eg
+      // "http://foobar.test/this-url-does-not-exist"
+      return (<span>Failed to load data</span>);
+    } else {
+      throw new Error("Unknown state while loading static data");
+    }
   }
 }
 

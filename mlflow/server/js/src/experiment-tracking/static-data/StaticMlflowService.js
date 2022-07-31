@@ -1,7 +1,7 @@
 import {
   STATIC_DATA
 } from './StaticData';
-
+import { getArtifactContent } from '../../common/utils/ArtifactUtils'
 
 const one = (xs) => {
   if (xs.length === 1) {
@@ -233,6 +233,34 @@ const reformatEntry = (runId, entry, experimentId) => {
 
   return result;
 };
+
+class StaticDataLoaderClass {
+  // static data to show in UI
+  LOADED_STATIC_DATA = undefined;
+
+  // promise (for attaching callbacks)
+  loaderPromise
+
+  // "LOADING NOT STARTED" -> "LOADING" -> {"LOADED" or "FAILED"}
+  state = "LOADING NOT STARTED"
+
+  constructor() {
+    console.log("startLoadingData:");
+    this.loaderPromise = getArtifactContent('./data.json');
+    this.state = "LOADING";
+
+    const self = this;
+
+    this.loaderPromise.then((value) => {
+      console.log("startLoadingData: Loaded dynamic data...");
+      self.LOADED_STATIC_DATA = JSON.parse(value);
+      self.state = "LOADED";
+      console.log("startLoadingData: Done");
+    });
+  }
+}
+
+export const StaticDataLoader = new StaticDataLoaderClass();
 
 export class StaticMlflowService {
   static listExperiments(dummy_arg) {

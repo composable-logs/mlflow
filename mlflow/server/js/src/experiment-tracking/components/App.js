@@ -25,6 +25,8 @@ import { ModelPage } from '../../model-registry/components/ModelPage';
 import { CompareModelVersionsPage } from '../../model-registry/components/CompareModelVersionsPage';
 import { SiteHeader } from '../static-data/UIConstants';
 
+import { StaticDataLoader } from '../static-data/StaticMlflowService';
+
 const isExperimentsActive = (match, location) => {
   // eslint-disable-next-line prefer-const
   let isActive = match && !location.pathname.includes('models');
@@ -36,8 +38,26 @@ const classNames = {
 };
 
 class App extends Component {
+
+  constructor(props) {
+    super(props);
+
+    console.log("StaticDataLoader", StaticDataLoader.state)
+
+    this.state = {
+      staticDataLoaderState: StaticDataLoader.state
+    };
+
+    StaticDataLoader.loaderPromise.then((value) => {
+      console.log("***** receivedData ******")
+      this.setState({
+        staticDataLoaderState: StaticDataLoader.state
+      });
+    })
+  }
+
   render() {
-    return (
+    const uiAfterDataHasLoaded = (
       <Router>
         <div style={{ height: '100vh' }}>
           <ErrorModal />
@@ -130,6 +150,14 @@ class App extends Component {
         </div>
       </Router>
     );
+
+    const state = this.state.staticDataLoaderState
+
+    if (state === "LOADED") {
+      return uiAfterDataHasLoaded;
+    } else {
+      return (<span> Data loading.... Please wait</span>);
+    }
   }
 }
 

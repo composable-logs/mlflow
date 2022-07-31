@@ -176,7 +176,7 @@ class StaticDataLoaderClass {
   state;
 
   constructor() {
-    this.loaderPromise = getArtifactContent('./data.json');
+    this.loaderPromise = getArtifactContent('./ui_static_data.json');
     this.state = "LOADING";
 
     //

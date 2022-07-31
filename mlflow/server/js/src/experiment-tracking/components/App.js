@@ -56,7 +56,13 @@ class App extends Component {
     const state = this.state.staticDataLoaderState
 
     if (state === "LOADING") {
-      return (<span> Data loading.... Please wait</span>);
+      return (
+        <div>
+          <span>
+            Data loading.... Please wait
+          </span>
+        </div>
+      );
     } else if (state === "LOADED") {
       return (<Router>
         <div style={{ height: '100vh' }}>

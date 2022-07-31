@@ -203,9 +203,6 @@ class StaticDataLoaderClass {
   registerData(staticData) {
     this.LOADED_STATIC_DATA = staticData
 
-    // --- Process loaded data ---
-
-    // Array of ID:s for pipeline runs
     this.ALL_PIPELINE_RUN_IDS = [...Object.entries(this.LOADED_STATIC_DATA)
       .filter(([runId, v]) => v.type === "pipeline")
       .map(([runId, v]) => runId)
@@ -359,12 +356,12 @@ export class StaticMlflowService {
 
     var result;
 
-    if ((experiment_ids.length === 1) && one(experiment_ids) === StaticMlflowService.ALL_PIPELINE_RUNS_ID) {
+    if ((experiment_ids.length === 1) && one(experiment_ids) === StaticDataLoader.ALL_PIPELINE_RUNS_ID) {
       // Return all pipeline runs with individual task runs as children
 
       result = [];
       for (const pipelineId of StaticDataLoader.ALL_PIPELINE_RUN_IDS) {
-        const pipelineEntry = reformatEntry(pipelineId, STATIC_DATA[pipelineId], StaticMlflowService.ALL_PIPELINE_RUNS_ID)
+        const pipelineEntry = reformatEntry(pipelineId, STATIC_DATA[pipelineId], StaticDataLoader.ALL_PIPELINE_RUNS_ID)
 
         result.push(pipelineEntry);
 
@@ -380,7 +377,7 @@ export class StaticMlflowService {
           // A solution would be to preface runID:s with prefix depending on use,
           // like eg. "list-<run-id>" and "exp-<run-id>", but this also seems to
           // work.
-          result.push(reformatEntry(childId, STATIC_DATA[childId], StaticMlflowService.ALL_PIPELINE_RUNS_ID));
+          result.push(reformatEntry(childId, STATIC_DATA[childId], StaticDataLoader.ALL_PIPELINE_RUNS_ID));
         }
       }
     } else {

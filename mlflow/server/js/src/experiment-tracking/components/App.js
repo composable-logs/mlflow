@@ -51,7 +51,7 @@ class App extends Component {
       });
     };
 
-    StaticDataLoader.loaderPromise.then(stateChangeHandler);
+    StaticDataLoader.loaderPromise.then(stateChangeHandler).catch(stateChangeHandler);
   }
 
   render() {
@@ -158,8 +158,8 @@ class App extends Component {
         </div>
       </Router>);
     } else if (state === "FAILED") {
-      // todo: this will not currently render even when there are errors
-      // with static asset loading.
+      // Manually test by changing static asset to eg
+      // "http://foobar.test/this-url-does-not-exist"
       return (<span>Failed to load data</span>);
     } else {
       throw new Error("Unknown state while loading static data");

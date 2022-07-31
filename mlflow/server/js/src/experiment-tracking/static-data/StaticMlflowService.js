@@ -173,7 +173,7 @@ class StaticDataLoaderClass {
   state;
 
   constructor() {
-    this.loaderPromise = getArtifactContent('./ui_static_data.json');
+    this.loaderPromise = getArtifactContent('ui_static_data.json');
 
     //
     // Note:
@@ -270,7 +270,7 @@ class StaticDataLoaderClass {
         );
       }
 
-      return { experiments: experiments };
+      return { experiments };
     })();
   }
 }

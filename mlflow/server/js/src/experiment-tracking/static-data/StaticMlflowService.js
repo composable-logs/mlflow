@@ -146,10 +146,10 @@ const reformatEntry = (runId, entry, experimentId) => {
   }
 
   if (entry.type === "run") {
-    const parentTaskId = StaticDataLoader.LOADED_STATIC_DATA[runId].parent_id;
+    const parentTaskId = StaticDataLoader.DATA[runId].parent_id;
     result.data.tags.push({
       key: "mlflow.parentRunId",
-      value: StaticDataLoader.LOADED_STATIC_DATA[parentTaskId].parent_id
+      value: StaticDataLoader.DATA[parentTaskId].parent_id
     });
   }
 
@@ -158,7 +158,7 @@ const reformatEntry = (runId, entry, experimentId) => {
 
 class StaticDataLoaderClass {
   // -- static data to show in UI --
-  LOADED_STATIC_DATA;
+  DATA;
   ALL_PIPELINE_RUN_IDS;
   PIPELINE_ID_TO_CHILDREN_RUN_IDS;
   LOOKUP_IDX_TO_TASK_SOURCE_NAME;
@@ -197,9 +197,9 @@ class StaticDataLoaderClass {
 
   registerData(state, staticData) {
     this.state = state;
-    this.LOADED_STATIC_DATA = staticData
+    this.DATA = staticData
 
-    this.ALL_PIPELINE_RUN_IDS = [...Object.entries(this.LOADED_STATIC_DATA)
+    this.ALL_PIPELINE_RUN_IDS = [...Object.entries(this.DATA)
       .filter(([runId, v]) => v.type === "pipeline")
       .map(([runId, v]) => runId)
     ];
@@ -208,9 +208,9 @@ class StaticDataLoaderClass {
       new Map(this.ALL_PIPELINE_RUN_IDS.map(pipelineId => {
         const result = [];
 
-        Object.entries(this.LOADED_STATIC_DATA).forEach(([vRunId, v]) => {
+        Object.entries(this.DATA).forEach(([vRunId, v]) => {
           if ((v.type === "task") && (v.parent_id === pipelineId)) {
-            Object.entries(this.LOADED_STATIC_DATA).forEach(([wRunId, w]) => {
+            Object.entries(this.DATA).forEach(([wRunId, w]) => {
               if ((w.type === "run") && (w.parent_id === vRunId)) {
                 result.push(wRunId);
               }
@@ -228,7 +228,7 @@ class StaticDataLoaderClass {
       result1.set(this.ALL_PIPELINE_RUNS_ID, "All pipeline runs");
 
       const result2 = new Map();
-      Object.entries(this.LOADED_STATIC_DATA)
+      Object.entries(this.DATA)
         .filter(([runId, entry]) => entry.type === "task")
         .forEach(([runId, entry]) => {
           const entryExperimentId = getTaskId(entry);
@@ -296,7 +296,7 @@ export class StaticMlflowService {
   }
 
   static getRunRawData(run_id) {
-    return StaticDataLoader.LOADED_STATIC_DATA[run_id];
+    return StaticDataLoader.DATA[run_id];
   }
 
   static getRun({
@@ -392,14 +392,14 @@ export class StaticMlflowService {
       const validSources = new Set(experiment_ids.map(eid => StaticDataLoader.LOOKUP_IDX_TO_TASK_SOURCE_NAME.get(eid)));
 
       // get parent Task id:s whose runs should be shown
-      const taskIds = new Set(Object.entries(StaticDataLoader.LOADED_STATIC_DATA)
+      const taskIds = new Set(Object.entries(StaticDataLoader.DATA)
         .filter(([runId, v]) => v.type === "task")
         .filter(([runId, v]) => validSources.has(v["metadata"]["attributes"]["task.notebook"]))
         .map(([runId, v]) => runId)
       );
 
       // find all children (run:s) under these tasks
-      result = [...Object.entries(StaticDataLoader.LOADED_STATIC_DATA)
+      result = [...Object.entries(StaticDataLoader.DATA)
         .filter(([runId, v]) => v.type === "run")
         .filter(([runId, v]) => taskIds.has(v["parent_id"]))
         .map(([runId, v]) => reformatEntry(runId, v, expId))

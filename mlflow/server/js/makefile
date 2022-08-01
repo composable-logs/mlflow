@@ -1,6 +1,8 @@
 # --- dev related tasks can be run inside image build with ML Flow
 # --- repo root Dockerfile + VS Code dev container setup
 
+.PHONY: *
+
 start-backend:
 	# clear any old experiments/artifacts
 	rm -rf /repo-root/mlflow/mlruns
@@ -119,6 +121,20 @@ docker-serve-static-ui-in-watch-mode:
 	        time make watch-ui; \
 	    )"
 
-.PHONY: build-static-site-py-package
-build-static-site-py-package:
-	(cd static-site-py-package/docker; make docker-build)
+### ---- 'webui-py-package' : build Python package with static website ----
+
+webui-py-package-docker-build:
+	make \
+	    --file webui-py-package/docker/makefile \
+		docker-build
+
+webui-py-package-docker-build:
+	(\
+	    make \
+	        --file webui-py-package/docker/makefile \
+	        docker-shell \
+	        DOCKER_ARGS=" \
+	            -v $$(pwd)/webui-py-package:/webui-py-package \
+	            -w /webui-py-package \
+	        " \
+	)

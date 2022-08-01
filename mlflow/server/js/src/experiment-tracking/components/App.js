@@ -12,6 +12,7 @@ import { HomePage } from './HomePage';
 import ErrorModal from '../../experiment-tracking/components/modals/ErrorModal';
 import { PageNotFoundView } from './PageNotFoundView';
 import { Switch } from 'react-router';
+import PuffLoader from "react-spinners/PuffLoader";
 import {
   modelListPageRoute,
   modelPageRoute,
@@ -56,13 +57,19 @@ class App extends Component {
 
   render() {
     const state = this.state.staticDataLoaderState
-
     if (state === "LOADING") {
       return (
-        <div>
-          <span>
-            Data loading.... Please wait
-          </span>
+        <div className='loading-container'>
+          <PuffLoader
+            cssOverride={{ margin: '0 auto' }}
+            size={200}
+            color={"#888"}
+            loading={true}
+            speedMultiplier={0.5}
+          />
+          <h1>
+            Loading logged data... Please wait
+          </h1>
         </div>
       );
     } else if (state === "LOADED") {

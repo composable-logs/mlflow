@@ -205,3 +205,19 @@ pre {
   border: 1px solid #ccc;
   border-radius: 4px;
 }
+
+/*** Loading screen ***/
+
+.loading-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+}
+
+.loading-container h1 {
+  color: #888;
+  text-align: center;
+  margin-top: 40px;
+}

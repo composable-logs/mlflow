@@ -118,3 +118,7 @@ docker-serve-static-ui-in-watch-mode:
 	        time npm install; \
 	        time make watch-ui; \
 	    )"
+
+.PHONY: build-static-site-py-package
+build-static-site-py-package:
+	(cd static-site-py-package/docker; make docker-build)

@@ -1,6 +1,6 @@
 from setuptools import setup, find_packages
 
-PACKAGE_NAME = "pynb_dag_runner_static_ui"
+PACKAGE_NAME = "pynb_dag_runner_webui"
 
 setup(
     name=PACKAGE_NAME,
@@ -9,7 +9,7 @@ setup(
     license="TODO",
     classifiers=[],
     url="https://pynb-dag-runner.github.io/pynb-dag-runner/",
-    version="0.0.1",
+    version="0.0.0",
     packages=find_packages(),
     # file paths relative to package root
     package_data={PACKAGE_NAME: ['data-file.txt']},

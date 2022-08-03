@@ -1,0 +1,15 @@
+name: "Reusable workflow to build and publish webui py package"
+
+on:
+  workflow_call:
+
+jobs:
+  foo:
+    name: Build and publish web ui Python package
+    runs-on: ubuntu-20.04
+
+    steps:
+      - name: "Determine run-environment"
+        shell: bash
+        run: |
+          echo "Hello world!"

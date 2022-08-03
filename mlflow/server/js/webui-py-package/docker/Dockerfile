@@ -18,6 +18,4 @@ RUN groupadd --gid $HOST_GID host_user_group  && \
 USER host_user
 ENV PATH "/home/host_user/.local/bin:$PATH"
 
-ENV PYTHONPYCACHEPREFIX=/home/host_user/.cache/python
-
 ENTRYPOINT ["/bin/bash", "-c"]

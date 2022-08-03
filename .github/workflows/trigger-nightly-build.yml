@@ -6,6 +6,11 @@ on:
 
   workflow_dispatch:
 
+  # debug
+  push:
+    branches:
+      - build-python-package
+
 jobs:
   trigger-nightly:
     permissions:

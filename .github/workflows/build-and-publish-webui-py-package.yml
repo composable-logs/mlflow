@@ -13,3 +13,13 @@ jobs:
         shell: bash
         run: |
           echo "Hello world!"
+
+      - uses: actions/checkout@v3
+        with:
+          persist-credentials: false
+          submodules: false
+
+      - name: "Compile static web UI"
+        shell: bash
+        run: |
+          ls -la .

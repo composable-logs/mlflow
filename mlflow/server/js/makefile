@@ -104,7 +104,7 @@ docker-build-static-ui:
 	        time make build-static-ui; \
 	    )"
 
-docker-serve-static-ui-in-watch-mode:
+dev-serve-static-ui-in-watch-mode[in-docker]:
 	# Docker:ized version of "watch-ui"-task.
 	# This must be executed in the same directory as this makefile.
 	#
@@ -121,10 +121,11 @@ docker-serve-static-ui-in-watch-mode:
 	        time make watch-ui; \
 	    )"
 
-### ---- 'webui-py-package' : build Python package with static website ----
+# --- 'webui-py-package' ---
+# Tasks to build Python package with compiled static website assets.
 
 webui-py-package/docker/build-image:
 	(cd webui-py-package/docker; make build-image)
 
-webui-py-package/build-wheel-file[dockerized]:
+webui-py-package/build-wheel-file[in-docker]:
 	(cd webui-py-package; make build-wheel-file[in-docker])

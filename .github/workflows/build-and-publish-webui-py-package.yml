@@ -40,6 +40,6 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: webui-py-package-wheel-file
-          path: ${{ github.workspace }}/mlflow/server/js/dist/
+          path: ${{ github.workspace }}/mlflow/server/js/webui-py-package/dist/
           if-no-files-found: error
-          retention-days: 10
+          retention-days: 7

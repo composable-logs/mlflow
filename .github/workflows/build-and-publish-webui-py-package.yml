@@ -20,6 +20,8 @@ jobs:
           submodules: false
 
       - name: "Compile static web UI"
+        working-directory: ${{ github.workspace }}/mlflow/server/js
         shell: bash
         run: |
+
           ls -la .

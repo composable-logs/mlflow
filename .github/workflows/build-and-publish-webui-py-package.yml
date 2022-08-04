@@ -5,23 +5,35 @@ on:
 
 jobs:
   foo:
-    name: Build and publish web ui Python package
+    name: Build and publish Python package with compiled static web assets
     runs-on: ubuntu-20.04
 
     steps:
-      - name: "Determine run-environment"
-        shell: bash
-        run: |
-          echo "Hello world!"
-
       - uses: actions/checkout@v3
         with:
           persist-credentials: false
           submodules: false
 
-      - name: "Compile static web UI"
+      - name: "Compile static UI: build Docker image"
         working-directory: ${{ github.workspace }}/mlflow/server/js
         shell: bash
         run: |
+          make docker-build-image-for-build-static-ui
 
-          ls -la .
+      - name: "Compile static UI: Compile front end code"
+        working-directory: ${{ github.workspace }}/mlflow/server/js
+        shell: bash
+        run: |
+          make docker-build-static-ui
+
+      - name: "webui-py-package: build Docker image"
+        working-directory: ${{ github.workspace }}/mlflow/server/js
+        shell: bash
+        run: |
+          make webui-py-package/docker/build-image
+
+      - name: "webui-py-package: build static assets"
+        working-directory: ${{ github.workspace }}/mlflow/server/js
+        shell: bash
+        run: |
+          make webui-py-package/build-wheel-file[in-docker]

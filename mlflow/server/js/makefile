@@ -141,5 +141,5 @@ webui-py-package/build-wheel-file[in-docker]:
 	# and these are included in the Python package.
 
 	cd webui-py-package
-	make add-asset-zip ASSET_DIRECTORY=$$(pwd)/../build
+	make set-assets ASSETS_DIRECTORY=$$(pwd)/../build
 	make build-wheel-file[in-docker]

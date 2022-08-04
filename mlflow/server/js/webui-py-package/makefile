@@ -16,12 +16,17 @@ build-wheel-file:
 	find ./dist/
 	echo "========================================="
 
-add-asset-zip:
-	@echo "--- Adding zip with assets from directory $(ASSET_DIRECTORY) ..."
+set-assets:
+	@echo "--- Setting assets to content in directory $(ASSETS_DIRECTORY) ..."
 	@echo "--- Content:"
-	@find $(ASSET_DIRECTORY)
+	@find $(ASSETS_DIRECTORY)
 
-	zip -r assets.zip $(ASSET_DIRECTORY)
+	@echo "--- Ensuring assets directory is empty"
+	rm -rf ./assets
+	mkdir assets
+
+	@echo "--- Copying assets ..."
+	cp -r $(ASSETS_DIRECTORY) ./assets/
 
 build-wheel-file[in-docker]:
 	cd docker

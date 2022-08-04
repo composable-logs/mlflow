@@ -1,3 +1,4 @@
+from typing import List
 from pathlib import Path
 
 from setuptools import setup, find_packages
@@ -5,9 +6,25 @@ from setuptools import setup, find_packages
 PACKAGE_NAME = "pynb_dag_runner_webui"
 PACKAGE_VERSION = "0.0.0"
 
-# -- test that assets.zip is in the same directory as setup.py
-if not (Path(__file__).parent / "assets.zip").is_file():
-    raise Exception(f"Please add assets.zip before building {PACKAGE_NAME}!")
+
+def _list_assets_files() -> List[str]:
+    """
+    Return: list of data file assets to include in package.
+
+    File names represented as strings and paths are relative to
+    "assets"-directory.
+    """
+
+    if not (Path(__file__).parent / "assets").is_dir():
+        raise Exception(
+            f"Please add files under 'assets' directory before building "
+            "{PACKAGE_NAME}!"
+        )
+
+    # Without str(..) we return a list of PosixPath:s which setup()
+    # function does not seem to support.
+    return [str(f) for f in Path("assets").glob("**/*") if f.is_file()]
+
 
 setup(
     name=PACKAGE_NAME,
@@ -20,11 +37,10 @@ setup(
         "https://github.com/pynb-dag-runner/mlflow/pull/2"
     ),
     author_email="matias.dahl@iki.fi",
-    license="Various",
+    license="Various, see description",
     classifiers=[],
     url="https://pynb-dag-runner.github.io/pynb-dag-runner/",
     version=PACKAGE_VERSION,
     packages=find_packages(),
-    # file paths relative to setup.py location
-    data_files=[('assets', ["assets.zip"])],
+    data_files=[('assets', _list_assets_files())],
 )

@@ -3,6 +3,11 @@ name: "Reusable workflow to build and publish webui py package"
 on:
   workflow_call:
 
+defaults:
+  run:
+    shell: bash
+    working-directory: ${{ github.workspace }}/mlflow/server/js
+
 jobs:
   foo:
     name: Build and publish Python package with compiled static web assets
@@ -15,25 +20,17 @@ jobs:
           submodules: false
 
       - name: "Compile static UI: build Docker image"
-        working-directory: ${{ github.workspace }}/mlflow/server/js
-        shell: bash
         run: |
           make docker-build-image-for-build-static-ui
 
       - name: "Compile static UI: Compile front end code"
-        working-directory: ${{ github.workspace }}/mlflow/server/js
-        shell: bash
         run: |
           make docker-build-static-ui
 
       - name: "webui-py-package: build Docker image"
-        working-directory: ${{ github.workspace }}/mlflow/server/js
-        shell: bash
         run: |
           make webui-py-package/docker/build-image
 
       - name: "webui-py-package: build Python wheel with UI static assets"
-        working-directory: ${{ github.workspace }}/mlflow/server/js
-        shell: bash
         run: |
           make webui-py-package/build-wheel-file[in-docker]

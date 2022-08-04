@@ -6,7 +6,7 @@ on:
 defaults:
   run:
     shell: bash
-    working-directory: ${{ github.workspace }}/mlflow/server/js
+    working-directory: ./mlflow/server/js
 
 jobs:
   foo:

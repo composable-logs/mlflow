@@ -1,16 +1,22 @@
 .PHONY: *
 
 SHELL := /bin/bash
-DOCKER_IMAGE_NAME := static-site-py-package
+DOCKER_IMAGE_NAME := img-build-webui-py-package
 
-docker-build:
-	@echo "=== Building Docker image for making Python package with compiled front end ==="
+build-image:
 	docker \
 	    build \
 	    --file Dockerfile \
 	    --build-arg HOST_UID=$$(id -u) \
 	    --build-arg HOST_GID="$$(id -g)" \
 	    --tag $(DOCKER_IMAGE_NAME) \
-		.
-docker-shell:
-	docker run -it $(DOCKER_ARGS) $(DOCKER_IMAGE_NAME) /bin/bash
+	    .
+
+run-command[in-docker]:
+	# Note: In the below, quotes are needed if DOCKER_COMMAND contains spaces.
+	# There might be better ways also?
+
+	docker run \
+	    --tty $(DOCKER_ARGS) \
+	    $(DOCKER_IMAGE_NAME) \
+	    "$(DOCKER_COMMAND)"

@@ -123,16 +123,8 @@ docker-serve-static-ui-in-watch-mode:
 
 ### ---- 'webui-py-package' : build Python package with static website ----
 
-webui-py-package--docker-build:
-	(cd webui-py-package/docker; make docker-build)
+webui-py-package/docker/build-image:
+	(cd webui-py-package/docker; make build-image)
 
-webui-py-package--docker-shell:
-	(\
-	    make \
-	        --file webui-py-package/docker/makefile \
-	        docker-shell \
-	        DOCKER_ARGS=" \
-	            --volume $$(pwd)/webui-py-package:/webui-py-package \
-	            --workdir /webui-py-package \
-	        " \
-	)
+webui-py-package/build-wheel-file[dockerized]:
+	(cd webui-py-package; make build-wheel-file[in-docker])

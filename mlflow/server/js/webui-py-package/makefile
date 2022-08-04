@@ -2,6 +2,8 @@
 .ONESHELL:
 SHELL := /bin/bash
 
+# Note: Tasks should be started with cwd = directory of this makefile
+
 clean:
 	rm -rf build dist pynb_dag_runner_webui.egg-info
 
@@ -19,7 +21,7 @@ add-asset-zip:
 	@echo "--- Content:"
 	@find $(ASSET_DIRECTORY)
 
-	zip -r pynb_dag_runner_webui/assets.zip $(ASSET_DIRECTORY)
+	zip -r assets.zip $(ASSET_DIRECTORY)
 
 build-wheel-file[in-docker]:
 	cd docker

@@ -138,9 +138,8 @@ webui-py-package/docker/build-image:
 
 webui-py-package/build-wheel-file[in-docker]:
 	# This command assumes that the ./build folder contains the compiled assets
-	# to include in the Python package.
+	# and these are included in the Python package.
 
-	MAKEFILE_LOCATION=$$(pwd)  # make should be invoked from makefile's directory
 	cd webui-py-package
-	make add-asset-zip ASSET_DIRECTORY=$$MAKEFILE_LOCATION/build
+	make add-asset-zip ASSET_DIRECTORY=$$(pwd)/../build
 	make build-wheel-file[in-docker]

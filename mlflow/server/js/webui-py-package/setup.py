@@ -7,7 +7,7 @@ PACKAGE_VERSION = "0.0.0"
 
 # -- test that assets.zip is in the same directory as setup.py
 if not (Path(__file__).parent / "assets.zip").is_file():
-    raise Exception(f"Please add website.zip before building {PACKAGE_NAME}!")
+    raise Exception(f"Please add assets.zip before building {PACKAGE_NAME}!")
 
 setup(
     name=PACKAGE_NAME,

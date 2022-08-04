@@ -14,6 +14,13 @@ build-wheel-file:
 	find ./dist/
 	echo "========================================="
 
+add-asset-zip:
+	@echo "--- Adding zip with assets from directory $(ASSET_DIRECTORY) ..."
+	@echo "--- Content:"
+	@find $(ASSET_DIRECTORY)
+
+	zip -r pynb_dag_runner_webui/assets.zip $(ASSET_DIRECTORY)
+
 build-wheel-file[in-docker]:
 	cd docker
 	make run-command[in-docker] \

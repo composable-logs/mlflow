@@ -1,3 +1,4 @@
+.ONESHELL:
 .PHONY: *
 
 # --- dev related tasks (for interactive development)
@@ -105,7 +106,7 @@ build-static-ui:
 	@echo "--- Cleaning build folder ..."
 	rm -rf build
 	@echo "--- Compiling UI ..."
-	time HOST_STATIC_SITE=true npm run build
+	HOST_STATIC_SITE=true npm run build
 
 	@echo "--- Locatation of ./build folder: ($$(pwd))"
 	@echo "--- Content and size of ./build-folder"
@@ -136,4 +137,10 @@ webui-py-package/docker/build-image:
 	(cd webui-py-package/docker; make build-image)
 
 webui-py-package/build-wheel-file[in-docker]:
-	(cd webui-py-package; make build-wheel-file[in-docker])
+	# This command assumes that the ./build folder contains the compiled assets
+	# to include in the Python package.
+
+	MAKEFILE_LOCATION=$$(pwd)  # make should be invoked from makefile's directory
+	cd webui-py-package
+	make add-asset-zip ASSET_DIRECTORY=$$MAKEFILE_LOCATION/build
+	make build-wheel-file[in-docker]

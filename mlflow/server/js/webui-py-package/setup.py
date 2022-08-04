@@ -5,8 +5,8 @@ from setuptools import setup, find_packages
 PACKAGE_NAME = "pynb_dag_runner_webui"
 PACKAGE_VERSION = "0.0.0"
 
-# -- test that website.zip is in the same directory as setup.py
-if not (Path(__file__).parent / "website.zip").is_file():
+# -- test that assets.zip is in the same directory as setup.py
+if not (Path(__file__).parent / "assets.zip").is_file():
     raise Exception(f"Please add website.zip before building {PACKAGE_NAME}!")
 
 setup(
@@ -26,5 +26,5 @@ setup(
     version=PACKAGE_VERSION,
     packages=find_packages(),
     # file paths relative to setup.py location
-    data_files=[('assets', ["website.zip"])],
+    data_files=[('assets', ["assets.zip"])],
 )

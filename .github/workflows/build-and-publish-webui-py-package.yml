@@ -32,7 +32,7 @@ jobs:
         run: |
           make webui-py-package/docker/build-image
 
-      - name: "webui-py-package: build static assets"
+      - name: "webui-py-package: build Python wheel with UI static assets"
         working-directory: ${{ github.workspace }}/mlflow/server/js
         shell: bash
         run: |

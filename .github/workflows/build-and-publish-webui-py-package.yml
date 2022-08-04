@@ -7,9 +7,10 @@ defaults:
   run:
     shell: bash
     working-directory: ./mlflow/server/js
+    # Note: ${{ github.workspace }} not supported with working-directory
 
 jobs:
-  foo:
+  main-step:
     name: Build and publish Python package with compiled static web assets
     runs-on: ubuntu-20.04
 
@@ -34,3 +35,11 @@ jobs:
       - name: "webui-py-package: build Python wheel with UI static assets"
         run: |
           make webui-py-package/build-wheel-file[in-docker]
+
+      - name: "Store output wheel-file as Github build artefact"
+        uses: actions/upload-artifact@v3
+        with:
+          name: webui-py-package-wheel-file
+          path: ${{ github.workspace }}/mlflow/server/js/dist/
+          if-no-files-found: error
+          retention-days: 10

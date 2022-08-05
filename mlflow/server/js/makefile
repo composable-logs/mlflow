@@ -134,12 +134,13 @@ docker-build-static-ui:
 # Tasks to build Python package with compiled static website assets.
 
 webui-py-package/docker/build-image:
-	(cd webui-py-package/docker; make build-image)
+	cd webui-py-package/docker
+	make build-image
 
 webui-py-package/build-wheel-file[in-docker]:
 	# This command assumes that the ./build folder contains the compiled assets
 	# and these are included in the Python package.
 
 	cd webui-py-package
-	make set-assets ASSETS_DIRECTORY=$$(pwd)/../build
+	make set-assets ASSETS_DIRECTORY=$$(pwd)/../build/.
 	make build-wheel-file[in-docker]

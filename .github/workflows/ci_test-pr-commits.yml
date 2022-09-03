@@ -13,7 +13,7 @@ jobs:
     permissions:
       contents: none
 
-    uses: ./.github/workflows/build-and-publish-webui-py-package.yml
+    uses: ./.github/workflows/_ci-build-and-publish-webui-py-package.yml
 
     with:
       python-package-release-target: ci-build

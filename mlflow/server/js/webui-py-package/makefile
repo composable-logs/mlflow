@@ -15,28 +15,17 @@ build-wheel-file:
 	@find ./dist/ -type f
 	@echo "--------------------------------------------------------------------"
 
-set-assets:
-	@echo "--- Setting assets to content in directory $(ASSETS_DIRECTORY) ..."
-	@echo "--- Content:"
-	@find $(ASSETS_DIRECTORY)
-
-	@echo "--- Ensuring assets directory is empty"
-	rm -rf ./assets
-	mkdir assets
-
-	@echo "--- Copying assets ..."
-	cp -r $(ASSETS_DIRECTORY) ./assets/
-
 build-wheel[in-docker]:
 	(\
 	    cd docker; \
 	    make run[in-docker] \
 	        DOCKER_ARGS=" \
 	            --volume $$(pwd)/../:/webui-py-package \
+	            --volume ${ASSETS_DIRECTORY}:/assets \
 	            --workdir /webui-py-package \
 	        " \
 	        DOCKER_COMMAND="( \
-	            ASSETS_PATH='./assets' \
+	            ASSETS_PATH='/assets' \
 	            make build-wheel-file \
-			)"; \
+	        )"; \
 	)

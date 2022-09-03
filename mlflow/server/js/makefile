@@ -139,7 +139,8 @@ webui-py-package/docker/build-image:
 webui-py-package/build-wheel[in-docker]:
 	# This command assumes that the ./build folder contains the compiled assets
 	# and these are included in the Python package.
-
-	cd webui-py-package
-	make set-assets ASSETS_DIRECTORY=$$(pwd)/../build/.
-	make build-wheel[in-docker]
+	(\
+	    export ASSETS_DIRECTORY=$$(pwd)/build/.; \
+	    cd webui-py-package; \
+	    make build-wheel[in-docker];
+	)

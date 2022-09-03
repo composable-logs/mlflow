@@ -1,24 +1,20 @@
-.PHONY: *
-
 SHELL := /bin/bash
-DOCKER_IMAGE_NAME := img-build-webui-py-package
+DOCKER_IMAGE_NAME := ui-asset-wheel-builder-docker-image
 
-build-image:
-	@# Eg. DOCKER_ARGS="--no-cache" to force rebuild
-
+$(DOCKER_IMAGE_NAME): Dockerfile
 	docker \
 	    build \
-	    $(DOCKER_ARGS) \
 	    --file Dockerfile \
 	    --build-arg HOST_UID=$$(id -u) \
 	    --build-arg HOST_GID="$$(id -g)" \
 	    --tag $(DOCKER_IMAGE_NAME) \
 	    .
 
-run-command[in-docker]:
-	@# Note: In the below, quotes are needed if DOCKER_COMMAND contains spaces.
-	@# There might be better ways also?
+	touch $@
 
+build-image: $(DOCKER_IMAGE_NAME)
+
+run[in-docker]: $(DOCKER_IMAGE_NAME)
 	docker run --rm \
 	    --tty $(DOCKER_ARGS) \
 	    $(DOCKER_IMAGE_NAME) \

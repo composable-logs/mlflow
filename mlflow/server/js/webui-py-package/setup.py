@@ -1,3 +1,5 @@
+import os
+
 from typing import Any, List, Tuple
 from pathlib import Path
 
@@ -5,6 +7,7 @@ from setuptools import setup, find_packages
 
 PACKAGE_NAME = "pynb_dag_runner_webui"
 PACKAGE_VERSION = "0.0.0"
+ASSETS_PATH = os.environ["ASSETS_PATH"]
 
 OutputDirectoryPath = Any
 InputFilepath = Any
@@ -36,16 +39,25 @@ def _list_assets_files(assets: Path) -> List[Tuple[OutputDirectoryPath, List[Inp
             "{PACKAGE_NAME}!"
         )
 
-    dir_to_list_of_files_dict = {}
-    for f in assets.glob("**/*"):
-        if f.is_file():
-            dir_name: str = str(f.relative_to(assets).parent)
-            full_filename: str = str(f)
+    files = [f for f in assets.glob("**/*") if f.is_file()]
 
-            if dir_name in dir_to_list_of_files_dict:
-                dir_to_list_of_files_dict[dir_name].append(full_filename)
-            else:
-                dir_to_list_of_files_dict[dir_name] = [full_filename]
+    # Abort if we try to add file system root etc
+    if len(files) > 75:
+        raise Exception("Too many files: 75 safeguard limit reached!")
+
+    # Group data into dict with structure
+    #
+    #   "relative/path/to/files" -> ['list.txt', 'of.html', 'files.css']
+    #
+    dir_to_list_of_files_dict = {}
+    for f in files:
+        dir_name: str = str(f.relative_to(assets).parent)
+        full_filename: str = str(f)
+
+        if dir_name in dir_to_list_of_files_dict:
+            dir_to_list_of_files_dict[dir_name].append(full_filename)
+        else:
+            dir_to_list_of_files_dict[dir_name] = [full_filename]
 
     return list(dir_to_list_of_files_dict.items())
 
@@ -66,5 +78,5 @@ setup(
     url="https://pynb-dag-runner.github.io/pynb-dag-runner/",
     version=PACKAGE_VERSION,
     packages=find_packages(),
-    data_files=_list_assets_files(assets = Path("./assets")),
+    data_files=_list_assets_files(assets = Path(ASSETS_PATH)),
 )

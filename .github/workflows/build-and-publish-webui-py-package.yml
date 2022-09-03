@@ -34,7 +34,7 @@ jobs:
 
       - name: "webui-py-package: build Python wheel with UI static assets"
         run: |
-          make webui-py-package/build-wheel-file[in-docker]
+          make webui-py-package/build-wheel[in-docker]
 
       - name: "Store output wheel-file as Github build artefact"
         uses: actions/upload-artifact@v3

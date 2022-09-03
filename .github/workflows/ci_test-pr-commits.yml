@@ -1,0 +1,19 @@
+name: "ci: test PR commits"
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - static_mlflow
+
+  workflow_dispatch:
+
+jobs:
+  ci-run-tests-on-new-commit:
+    permissions:
+      contents: none
+
+    uses: ./.github/workflows/build-and-publish-webui-py-package.yml
+
+    with:
+      python-package-release-target: ci-build

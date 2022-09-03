@@ -5,9 +5,28 @@ from pathlib import Path
 
 from setuptools import setup, find_packages
 
-PACKAGE_NAME = "pynb_dag_runner_webui"
-PACKAGE_VERSION = "0.0.0"
+# ---
+
+PYTHON_PACKAGE_NAME = "pynb_dag_runner_webui"
+PYTHON_PACKAGE_VERSION = "0.0.0"
 ASSETS_PATH = os.environ["ASSETS_PATH"]
+
+PYTHON_PACKAGE_RELEASE_TARGET = os.environ["PYTHON_PACKAGE_RELEASE_TARGET"]
+
+print("ASSETS_PATH                     : ", ASSETS_PATH)
+print("PYTHON_PACKAGE_RELEASE_TARGET   : ", PYTHON_PACKAGE_RELEASE_TARGET)
+
+if PYTHON_PACKAGE_RELEASE_TARGET == "ci-build":
+    # CI builds only test that we can build the package. Then mark version as "local"
+    # so wheel can not be published to PyPI (PEP 440)
+    PYTHON_PACKAGE_VERSION += f"+ci-build"
+
+else:
+    raise Exception(
+        f"Unknown PYTHON_PACKAGE_RELEASE_TARGET={PYTHON_PACKAGE_RELEASE_TARGET}"
+    )
+
+# ---
 
 OutputDirectoryPath = Any
 InputFilepath = Any
@@ -28,7 +47,7 @@ def _list_assets_files(assets: Path) -> List[Tuple[OutputDirectoryPath, List[Inp
       but filenames can not be modified.
 
     The complexity of the below arises since Python setup does not
-    seem to support "include this directory tree".  See,
+    seem to support "include this directory tree". See,
 
     https://docs.python.org/3/distutils/setupscript.html#installing-additional-files
     """
@@ -36,7 +55,7 @@ def _list_assets_files(assets: Path) -> List[Tuple[OutputDirectoryPath, List[Inp
     if not assets.is_dir():
         raise Exception(
             f"Please add files under {assets} directory before building "
-            "{PACKAGE_NAME}!"
+            "{PYTHON_PACKAGE_NAME}!"
         )
 
     files = [f for f in assets.glob("**/*") if f.is_file()]
@@ -63,7 +82,7 @@ def _list_assets_files(assets: Path) -> List[Tuple[OutputDirectoryPath, List[Inp
 
 
 setup(
-    name=PACKAGE_NAME,
+    name=PYTHON_PACKAGE_NAME,
     author="Matias Dahl (based on a modified version of the MLFlow project)",
     description=(
         "This Python package contain compiled Javascript code from "
@@ -76,7 +95,7 @@ setup(
     license="Various, see the description",
     classifiers=[],
     url="https://pynb-dag-runner.github.io/pynb-dag-runner/",
-    version=PACKAGE_VERSION,
+    version=PYTHON_PACKAGE_VERSION,
     packages=find_packages(),
     data_files=_list_assets_files(assets = Path(ASSETS_PATH)),
 )

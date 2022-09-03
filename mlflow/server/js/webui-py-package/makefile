@@ -1,7 +1,7 @@
 .PHONY: *
 SHELL := /bin/bash
 
-# Note: Tasks should be started with cwd = directory of this makefile
+# Note: Tasks should be started is same directory as makefile
 
 clean:
 	rm -rf build dist pynb_dag_runner_webui.egg-info
@@ -35,5 +35,8 @@ build-wheel[in-docker]:
 	            --volume $$(pwd)/../:/webui-py-package \
 	            --workdir /webui-py-package \
 	        " \
-	        DOCKER_COMMAND="make build-wheel-file"; \
+	        DOCKER_COMMAND="( \
+	            ASSETS_PATH='./assets' \
+	            make build-wheel-file \
+			)"; \
 	)

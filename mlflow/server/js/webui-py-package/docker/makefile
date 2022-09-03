@@ -1,7 +1,7 @@
 SHELL := /bin/bash
-DOCKER_IMAGE_NAME := img-build-webui-py-package
+DOCKER_IMAGE_NAME := ui-asset-wheel-builder-docker-image
 
-_docker_image: Dockerfile
+$(DOCKER_IMAGE_NAME): Dockerfile
 	docker \
 	    build \
 	    --file Dockerfile \
@@ -12,7 +12,9 @@ _docker_image: Dockerfile
 
 	touch $@
 
-run[in-docker]: _docker_image
+build-image: $(DOCKER_IMAGE_NAME)
+
+run[in-docker]: $(DOCKER_IMAGE_NAME)
 	docker run --rm \
 	    --tty $(DOCKER_ARGS) \
 	    $(DOCKER_IMAGE_NAME) \

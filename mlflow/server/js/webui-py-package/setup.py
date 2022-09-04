@@ -12,25 +12,31 @@ PYTHON_PACKAGE_NAME = "pynb_dag_runner_webui"
 # ASSETS_PATH is path to file assets to include into the Python package.
 # The files can have a nested directory structure.
 ASSETS_PATH = os.environ["ASSETS_PATH"]
-print("ASSETS_PATH                     : ", ASSETS_PATH)
 
 # Determine package version
 PYTHON_PACKAGE_VERSION: str = Path("PYTHON_PACKAGE_VERSION").read_text().splitlines()[0]
 
 # PYTHON_PACKAGE_RELEASE_TARGET
 PYTHON_PACKAGE_RELEASE_TARGET = os.environ["PYTHON_PACKAGE_RELEASE_TARGET"]
-print("PYTHON_PACKAGE_RELEASE_TARGET   : ", PYTHON_PACKAGE_RELEASE_TARGET)
 
 if PYTHON_PACKAGE_RELEASE_TARGET == "ci-build":
     # CI builds only test that we can build the package. For such builds, the
     # version is marked as "local" (with a +) so wheel can not be published to
     # PyPI (see, PEP 440).
-    PYTHON_PACKAGE_VERSION += f"+ci-build"
+    PYTHON_PACKAGE_VERSION += "+ci-build"
+
+elif PYTHON_PACKAGE_RELEASE_TARGET == "main-release":
+    # No changes needed for main release to PyPI
+    pass
 
 else:
     raise Exception(
         f"Unknown PYTHON_PACKAGE_RELEASE_TARGET={PYTHON_PACKAGE_RELEASE_TARGET}"
     )
+
+print("setup.py: ASSETS_PATH                     : ", ASSETS_PATH)
+print("setup.py: PYTHON_PACKAGE_RELEASE_TARGET   : ", PYTHON_PACKAGE_RELEASE_TARGET)
+print("setup.py: PYTHON_PACKAGE_VERSION          : ", PYTHON_PACKAGE_VERSION)
 
 # ---
 

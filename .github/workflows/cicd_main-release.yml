@@ -17,11 +17,11 @@ jobs:
       python-package-release-target: main-release
 
   cd-publish-package:
+    needs: ci-run-tests
+
     permissions:
       contents: none
-
-    uses: ./.github/workflows/_cd-publish-and-main-release.yml
-
+    uses: ./.github/workflows/_cd-publish-main-release.yml
     with:
       SECRET_TOKEN: ${{ secrets.PYPI_SECRET_TOKEN }}
 

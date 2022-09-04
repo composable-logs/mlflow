@@ -3,10 +3,26 @@ SHELL := /bin/bash
 
 # Note: Tasks should be started is same directory as makefile
 
+# --- Helper tasks ---
+#
+# Test that correct environment variables are set for the main tasks.
+# See setup.py for details about the variables.
+_env_PYTHON_PACKAGE_RELEASE_TARGET:
+ifndef PYTHON_PACKAGE_RELEASE_TARGET
+  $(error PYTHON_PACKAGE_RELEASE_TARGET not set)
+endif
+
+_env_ASSETS_PATH:
+ifndef ASSETS_PATH
+  $(error ASSETS_PATH not set)
+endif
+
+# --- Main tasks ---
+
 clean:
 	rm -rf build dist pynb_dag_runner_webui.egg-info
 
-build-wheel-file:
+build-wheel: | _env_PYTHON_PACKAGE_RELEASE_TARGET _env_ASSETS_PATH
 	@make clean
 
 	@python3 setup.py bdist_wheel
@@ -15,17 +31,18 @@ build-wheel-file:
 	@find ./dist/ -type f
 	@echo "--------------------------------------------------------------------"
 
-build-wheel[in-docker]:
+build-wheel[in-docker]: | _env_PYTHON_PACKAGE_RELEASE_TARGET _env_ASSETS_PATH
 	(\
 	    cd docker; \
 	    make run[in-docker] \
 	        DOCKER_ARGS=" \
+	            -e PYTHON_PACKAGE_RELEASE_TARGET \
 	            --volume $$(pwd)/../:/webui-py-package \
-	            --volume ${ASSETS_DIRECTORY}:/assets \
+	            --volume ${ASSETS_PATH}:/assets \
 	            --workdir /webui-py-package \
 	        " \
 	        DOCKER_COMMAND="( \
 	            ASSETS_PATH='/assets' \
-	            make build-wheel-file \
+	            make build-wheel \
 	        )"; \
 	)

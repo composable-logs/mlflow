@@ -2,6 +2,10 @@ name: "Reusable workflow to build and publish webui py package"
 
 on:
   workflow_call:
+    inputs:
+      python-package-release-target:
+        required: true
+        type: string    # "ci-build", "main-release"
 
 defaults:
   run:
@@ -35,6 +39,8 @@ jobs:
       - name: "webui-py-package: build Python wheel with UI static assets"
         run: |
           make webui-py-package/build-wheel[in-docker]
+        env:
+          PYTHON_PACKAGE_RELEASE_TARGET: ${{ inputs.python-package-release-target }}
 
       - name: "Store output wheel-file as Github build artefact"
         uses: actions/upload-artifact@v3
@@ -42,4 +48,4 @@ jobs:
           name: webui-py-package-wheel-file
           path: ${{ github.workspace }}/mlflow/server/js/webui-py-package/dist/
           if-no-files-found: error
-          retention-days: 7
+          retention-days: 3

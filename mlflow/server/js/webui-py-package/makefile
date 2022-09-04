@@ -26,10 +26,10 @@ build-wheel: | _release_target_env_is_set
 
 build-wheel[in-docker]: | _release_target_env_is_set
 
-# Task will build a wheel file containing all data assets in ASSETS_DIRECTORY.
+# Task will build a wheel file containing all data assets in ASSETS_PATH.
 # Check that this is set.
-ifndef ASSETS_DIRECTORY
-$(error ASSETS_DIRECTORY not set)
+ifndef ASSETS_PATH
+$(error ASSETS_PATH not set)
 endif
 
 	(\
@@ -38,7 +38,7 @@ endif
 	        DOCKER_ARGS=" \
 	            -e PYTHON_PACKAGE_RELEASE_TARGET \
 	            --volume $$(pwd)/../:/webui-py-package \
-	            --volume ${ASSETS_DIRECTORY}:/assets \
+	            --volume ${ASSETS_PATH}:/assets \
 	            --workdir /webui-py-package \
 	        " \
 	        DOCKER_COMMAND="( \

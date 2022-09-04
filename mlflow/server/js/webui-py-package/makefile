@@ -3,11 +3,17 @@ SHELL := /bin/bash
 
 # Note: Tasks should be started is same directory as makefile
 
-_release_target_env_is_set:
-# Check that release target environment variable is set (as requisite
-# for wheel build tasks)
+# --- Task dependencies to check correct environment variables are set ---
+#
+# See setup.py for details.
+_env_PYTHON_PACKAGE_RELEASE_TARGET:
 ifndef PYTHON_PACKAGE_RELEASE_TARGET
 $(error PYTHON_PACKAGE_RELEASE_TARGET not set)
+endif
+
+_env_ASSETS_PATH:
+ifndef _env_ASSETS_PATH
+$(error ASSETS_PATH not set)
 endif
 
 # ---
@@ -15,7 +21,7 @@ endif
 clean:
 	rm -rf build dist pynb_dag_runner_webui.egg-info
 
-build-wheel: | _release_target_env_is_set
+build-wheel: | _env_PYTHON_PACKAGE_RELEASE_TARGET _env_ASSETS_PATH
 	@make clean
 
 	@python3 setup.py bdist_wheel
@@ -24,14 +30,7 @@ build-wheel: | _release_target_env_is_set
 	@find ./dist/ -type f
 	@echo "--------------------------------------------------------------------"
 
-build-wheel[in-docker]: | _release_target_env_is_set
-
-# Task will build a wheel file containing all data assets in ASSETS_PATH.
-# Check that this is set.
-ifndef ASSETS_PATH
-$(error ASSETS_PATH not set)
-endif
-
+build-wheel[in-docker]: | _env_PYTHON_PACKAGE_RELEASE_TARGET _env_ASSETS_PATH
 	(\
 	    cd docker; \
 	    make run[in-docker] \

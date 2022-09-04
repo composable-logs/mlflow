@@ -8,17 +8,23 @@ from setuptools import setup, find_packages
 # ---
 
 PYTHON_PACKAGE_NAME = "pynb_dag_runner_webui"
-PYTHON_PACKAGE_VERSION = "0.0.0"
+
+# ASSETS_PATH is path to file assets to include into the Python package.
+# The files can have a nested directory structure.
 ASSETS_PATH = os.environ["ASSETS_PATH"]
-
-PYTHON_PACKAGE_RELEASE_TARGET = os.environ["PYTHON_PACKAGE_RELEASE_TARGET"]
-
 print("ASSETS_PATH                     : ", ASSETS_PATH)
+
+# Determine package version
+PYTHON_PACKAGE_VERSION = "0.0.0"
+
+# PYTHON_PACKAGE_RELEASE_TARGET
+PYTHON_PACKAGE_RELEASE_TARGET = os.environ["PYTHON_PACKAGE_RELEASE_TARGET"]
 print("PYTHON_PACKAGE_RELEASE_TARGET   : ", PYTHON_PACKAGE_RELEASE_TARGET)
 
 if PYTHON_PACKAGE_RELEASE_TARGET == "ci-build":
-    # CI builds only test that we can build the package. Then mark version as "local"
-    # so wheel can not be published to PyPI (PEP 440)
+    # CI builds only test that we can build the package. For such builds, the
+    # version is marked as "local" (with a +) so wheel can not be published to
+    # PyPI (see, PEP 440).
     PYTHON_PACKAGE_VERSION += f"+ci-build"
 
 else:

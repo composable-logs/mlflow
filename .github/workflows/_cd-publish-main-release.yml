@@ -16,7 +16,7 @@ jobs:
         uses: actions/download-artifact@v3
         with:
           path: dist
-          name: pynb-dag-runner-wheel
+          name: webui-py-package-wheel-file
 
       - name: Publish package
         # commit sha below points to tag v1.5.1, see

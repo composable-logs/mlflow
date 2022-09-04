@@ -3,20 +3,21 @@ SHELL := /bin/bash
 
 # Note: Tasks should be started is same directory as makefile
 
-# --- Task dependencies to check correct environment variables are set ---
+# --- Helper tasks ---
 #
-# See setup.py for details.
+# Test that correct environment variables are set for the main tasks.
+# See setup.py for details about the variables.
 _env_PYTHON_PACKAGE_RELEASE_TARGET:
 ifndef PYTHON_PACKAGE_RELEASE_TARGET
-$(error PYTHON_PACKAGE_RELEASE_TARGET not set)
+  $(error PYTHON_PACKAGE_RELEASE_TARGET not set)
 endif
 
 _env_ASSETS_PATH:
-ifndef _env_ASSETS_PATH
-$(error ASSETS_PATH not set)
+ifndef ASSETS_PATH
+  $(error ASSETS_PATH not set)
 endif
 
-# ---
+# --- Main tasks ---
 
 clean:
 	rm -rf build dist pynb_dag_runner_webui.egg-info

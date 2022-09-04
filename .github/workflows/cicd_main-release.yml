@@ -1,0 +1,28 @@
+name: "ci/cd: main release to PyPI"
+
+on:
+  push:
+    branches:
+      - static_mlflow
+      - main-release # debug
+    #paths:
+    #  - workspace/pynb_dag_runner/PYTHON_PACKAGE_VERSION
+
+jobs:
+  ci-run-tests:
+    permissions:
+      contents: none
+    uses: ./.github/workflows/_ci-build-and-publish-webui-py-package.yml
+    with:
+      python-package-release-target: main-release
+
+  cd-publish-package:
+    permissions:
+      contents: none
+
+    uses: ./.github/workflows/_cd-publish-and-main-release.yml
+
+    with:
+      SECRET_TOKEN: ${{ secrets.PYPI_SECRET_TOKEN }}
+
+  # tag release

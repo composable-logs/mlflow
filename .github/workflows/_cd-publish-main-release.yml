@@ -1,0 +1,27 @@
+name: "cd: Publish main release to pypi"
+
+on:
+  workflow_call:
+    secrets:
+      SECRET_TOKEN:
+        required: true
+
+jobs:
+  cd-upload-package-to-pypi:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 15
+
+    steps:
+      - name: Download wheel file built in previously step
+        uses: actions/download-artifact@v3
+        with:
+          path: dist
+          name: pynb-dag-runner-wheel
+
+      - name: Publish package
+        # sha below points to tag v1.5.1, see:
+        # https://github.com/pypa/gh-action-pypi-publish
+        uses: pypa/gh-action-pypi-publish@37f50c2
+        with:
+          packages_dir: dist
+          password: ${{ secrets.SECRET_TOKEN }}

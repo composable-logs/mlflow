@@ -15,7 +15,7 @@ ASSETS_PATH = os.environ["ASSETS_PATH"]
 print("ASSETS_PATH                     : ", ASSETS_PATH)
 
 # Determine package version
-PYTHON_PACKAGE_VERSION = "0.0.0"
+PYTHON_PACKAGE_VERSION: str = Path("PYTHON_PACKAGE_VERSION").read_text().splitlines()[0]
 
 # PYTHON_PACKAGE_RELEASE_TARGET
 PYTHON_PACKAGE_RELEASE_TARGET = os.environ["PYTHON_PACKAGE_RELEASE_TARGET"]

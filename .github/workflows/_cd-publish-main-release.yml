@@ -19,7 +19,7 @@ jobs:
           name: pynb-dag-runner-wheel
 
       - name: Publish package
-        # sha below points to tag v1.5.1, see:
+        # sha below points to tag v1.5.1, see
         # https://github.com/pypa/gh-action-pypi-publish
         uses: pypa/gh-action-pypi-publish@37f50c2
         with:

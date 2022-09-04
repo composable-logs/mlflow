@@ -22,7 +22,6 @@ jobs:
     permissions:
       contents: none
     uses: ./.github/workflows/_cd-publish-main-release.yml
-    with:
-      SECRET_TOKEN: ${{ secrets.PYPI_SECRET_TOKEN }}
-
+    secrets:
+      PYPI_SECRET_API_TOKEN: ${{ secrets.GH_PYPI_SECRET_API_TOKEN }}
   # tag release

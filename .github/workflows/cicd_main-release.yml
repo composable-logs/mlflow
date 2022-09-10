@@ -17,10 +17,41 @@ jobs:
 
   cd-publish-package:
     needs: ci-run-tests
-
     permissions:
       contents: none
     uses: ./.github/workflows/_cd-publish-main-release.yml
     secrets:
       PYPI_SECRET_API_TOKEN: ${{ secrets.GH_PYPI_SECRET_API_TOKEN }}
-  # tag release
+
+  cd-tag-release-commit:
+    needs: cd-publish-package
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          persist-credentials: true
+
+      - name: Determining version for this release
+        shell: bash
+        working-directory: ${{ github.workspace }}
+        run: |
+          echo "PYTHON_PACKAGE_VERSION=$( \
+            cat ./mlflow/server/js/webui-py-package/PYTHON_PACKAGE_VERSION | \
+                head -n 1 - \
+          )" >> $GITHUB_ENV
+          echo "PYTHON_PACKAGE_VERSION = ${PYTHON_PACKAGE_VERSION}"
+
+      - name: Tag git-commit with version for this release
+        shell: bash
+        run: |
+          # Note:
+          #  - The original ML Flow project uses tags like 'v1.2.3' for
+          #    releases.
+          #  - These tags have not been removed form the static UI fork.
+          #  - To distinguish static-ui releases we use tags with format
+          #    'static-v1.2.3'
+          #
+          git tag "static-v${PYTHON_PACKAGE_VERSION}" main
+          git push origin "static-v${PYTHON_PACKAGE_VERSION}"

@@ -5,7 +5,7 @@ on:
     branches:
       - static_mlflow
     paths:
-      - workspace/pynb_dag_runner/PYTHON_PACKAGE_VERSION
+      - mlflow/server/js/webui-py-package/PYTHON_PACKAGE_VERSION
 
 jobs:
   ci-run-tests:

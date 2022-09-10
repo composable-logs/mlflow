@@ -1,4 +1,4 @@
-0.0.4
+0.0.5
 
 # When a PR is merged to default branch, changes to this file will trigger:
 #
@@ -6,4 +6,11 @@
 #      and then,
 #
 #  (2) tag the PR commit with the version.
+#
+#      Note on tags:
+#      - The original ML Flow project uses tags like 'v1.2.3' to
+#        mark releases.
+#      - These tags have not been removed form the static UI repo fork.
+#      - To distinguish static-ui releases we use tags with format
+#        'static-v1.2.3' to mark commits that have been released.
 #

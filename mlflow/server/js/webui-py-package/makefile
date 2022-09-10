@@ -17,7 +17,7 @@ env_%:
 clean:
 	rm -rf build dist pynb_dag_runner_webui.egg-info
 
-build-wheel: | _env_PYTHON_PACKAGE_RELEASE_TARGET _env_ASSETS_PATH
+build-wheel: | env_PYTHON_PACKAGE_RELEASE_TARGET env_ASSETS_PATH
 	@make clean
 
 	@python3 setup.py bdist_wheel
@@ -26,7 +26,7 @@ build-wheel: | _env_PYTHON_PACKAGE_RELEASE_TARGET _env_ASSETS_PATH
 	@find ./dist/ -type f
 	@echo "--------------------------------------------------------------------"
 
-build-wheel[in-docker]: | _env_PYTHON_PACKAGE_RELEASE_TARGET _env_ASSETS_PATH
+build-wheel[in-docker]: | env_PYTHON_PACKAGE_RELEASE_TARGET env_ASSETS_PATH
 	(\
 	    cd docker; \
 	    make run[in-docker] \

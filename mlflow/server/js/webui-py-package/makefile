@@ -3,26 +3,21 @@ SHELL := /bin/bash
 
 # Note: Tasks should be started is same directory as makefile
 
-# --- Helper tasks ---
-#
-# Test that correct environment variables are set for the main tasks.
-# See setup.py for details about the variables.
-_env_PYTHON_PACKAGE_RELEASE_TARGET:
-ifndef PYTHON_PACKAGE_RELEASE_TARGET
-  $(error PYTHON_PACKAGE_RELEASE_TARGET not set)
-endif
+# # --- Helper tasks ---
 
-_env_ASSETS_PATH:
-ifndef ASSETS_PATH
-  $(error ASSETS_PATH not set)
-endif
+env_%:
+	@# Implict task dependency that fails if variable is not defined
+	@#
+	@# See, https://stackoverflow.com/a/7367903
+	@#
+	@if [[ -z "${$*}" ]]; then exit 1; fi
 
 # --- Main tasks ---
 
 clean:
 	rm -rf build dist pynb_dag_runner_webui.egg-info
 
-build-wheel: | _env_PYTHON_PACKAGE_RELEASE_TARGET _env_ASSETS_PATH
+build-wheel: | env_PYTHON_PACKAGE_RELEASE_TARGET env_ASSETS_PATH
 	@make clean
 
 	@python3 setup.py bdist_wheel
@@ -31,7 +26,7 @@ build-wheel: | _env_PYTHON_PACKAGE_RELEASE_TARGET _env_ASSETS_PATH
 	@find ./dist/ -type f
 	@echo "--------------------------------------------------------------------"
 
-build-wheel[in-docker]: | _env_PYTHON_PACKAGE_RELEASE_TARGET _env_ASSETS_PATH
+build-wheel[in-docker]: | env_PYTHON_PACKAGE_RELEASE_TARGET env_ASSETS_PATH
 	(\
 	    cd docker; \
 	    make run[in-docker] \

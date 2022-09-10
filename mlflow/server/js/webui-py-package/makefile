@@ -3,19 +3,14 @@ SHELL := /bin/bash
 
 # Note: Tasks should be started is same directory as makefile
 
-# --- Helper tasks ---
-#
-# Test that correct environment variables are set for the main tasks.
-# See setup.py for details about the variables.
-_env_PYTHON_PACKAGE_RELEASE_TARGET:
-ifndef PYTHON_PACKAGE_RELEASE_TARGET
-  $(error PYTHON_PACKAGE_RELEASE_TARGET not set)
-endif
+# # --- Helper tasks ---
 
-_env_ASSETS_PATH:
-ifndef ASSETS_PATH
-  $(error ASSETS_PATH not set)
-endif
+env_%:
+	@# Implict task dependency that fails if variable is not defined
+	@#
+	@# See, https://stackoverflow.com/a/7367903
+	@#
+	@if [[ -z "${$*}" ]]; then exit 1; fi
 
 # --- Main tasks ---
 

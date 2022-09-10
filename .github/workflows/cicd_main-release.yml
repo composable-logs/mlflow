@@ -4,9 +4,8 @@ on:
   push:
     branches:
       - static_mlflow
-      - main-release # debug
-    #paths:
-    #  - workspace/pynb_dag_runner/PYTHON_PACKAGE_VERSION
+    paths:
+      - workspace/pynb_dag_runner/PYTHON_PACKAGE_VERSION
 
 jobs:
   ci-run-tests:

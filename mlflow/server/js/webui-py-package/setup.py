@@ -78,11 +78,19 @@ def _list_assets_files(assets: Path) -> List[Tuple[OutputDirectoryPath, List[Inp
 
     # Group data into dict with structure
     #
-    #   "relative/path/to/files" -> ['list.txt', 'of.html', 'files.css']
+    #   "relative/path/to/files" (for output) -> [list to (input) file paths]
     #
     dir_to_list_of_files_dict = {}
     for f in files:
-        dir_name: str = str(f.relative_to(assets).parent)
+        # When the package is installed like:
+        #
+        #   pip install <package name> --target path/to/install/dir
+        #
+        # Then the package data files are written to the target directory, but so
+        # are Python package-directories. By adding the asset-directory prefix
+        # like below, package (1) data, (2) code, and (3) metadate are all written
+        # in separate directories.
+        dir_name: str = str(Path("assets") / f.relative_to(assets).parent)
         full_filename: str = str(f)
 
         if dir_name in dir_to_list_of_files_dict:

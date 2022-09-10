@@ -47,5 +47,5 @@ jobs:
       - name: Tag git-commit with version for this release
         shell: bash
         run: |
-          git tag "static-v${PYTHON_PACKAGE_VERSION}" main
+          git tag "static-v${PYTHON_PACKAGE_VERSION}" static_mlflow
           git push origin "static-v${PYTHON_PACKAGE_VERSION}"

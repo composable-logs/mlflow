@@ -1,15 +1,12 @@
 .PHONY: *
 SHELL := /bin/bash
 
-# Note: Tasks should be started is same directory as makefile
+# Note: This should run in the same directory as the makefile
 
 # # --- Helper tasks ---
 
 env_%:
-	@# Implict task dependency that fails if variable is not defined
-	@#
-	@# See, https://stackoverflow.com/a/7367903
-	@#
+	@# Check that a variable is defined, see stackoverflow.com/a/7367903
 	@if [[ -z "${$*}" ]]; then exit 1; fi
 
 # --- Main tasks ---

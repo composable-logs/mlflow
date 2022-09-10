@@ -1,0 +1,10 @@
+0.0.1
+
+# When a PR is merged to default branch, changes to this file will trigger:
+#
+#  (1) a release to PyPI with the version listed on the first line above,
+#      and then,
+#
+#  (2) tag the PR commit with the version (eg v1.2.3, also determined by
+#      first line).
+#

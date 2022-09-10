@@ -25,6 +25,7 @@ jobs:
 
   cd-tag-release-commit:
     needs: cd-publish-package
+    runs-on: ubuntu-20.04
     permissions:
       contents: write
 
@@ -46,12 +47,5 @@ jobs:
       - name: Tag git-commit with version for this release
         shell: bash
         run: |
-          # Note:
-          #  - The original ML Flow project uses tags like 'v1.2.3' for
-          #    releases.
-          #  - These tags have not been removed form the static UI fork.
-          #  - To distinguish static-ui releases we use tags with format
-          #    'static-v1.2.3'
-          #
           git tag "static-v${PYTHON_PACKAGE_VERSION}" main
           git push origin "static-v${PYTHON_PACKAGE_VERSION}"

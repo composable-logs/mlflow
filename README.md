@@ -1,6 +1,22 @@
 **This repository contains a modified version of ML Flow.**
 **The modified version can be hosted as a static website.**
 
+<div align="center">
+
+  <!-- 
+    -- Need an empty line above: https://stackoverflow.com/a/70293384 
+    -- First <a href>..</a> also should be on one line
+    -->
+  <a href="https://github.com/pynb-dag-runner/mlflow#license">![license=apache2](https://img.shields.io/github/license/pynb-dag-runner/mlflow?style=flat-square)</a>
+  <a href="https://github.com/pynb-dag-runner/mlflow/actions/workflows/cicd_main-release.yml">
+    ![ci/cd: main release to PyPI](https://github.com/pynb-dag-runner/mlflow/actions/workflows/cicd_main-release.yml/badge.svg)
+  </a>
+  <a href="https://pypi.org/project/pynb-dag-runner-webui/">
+    ![PyPI version](https://badge.fury.io/py/pynb-dag-runner-webui.svg)
+  </a>
+
+</div>
+
 ## Motivation: Static hosting of MLFlow
 
 The usual MLFlow front end (for experiment tracking) relies on a backend API for querying results about past experiments.

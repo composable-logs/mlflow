@@ -33,7 +33,8 @@ Even if `pynb-dag-runner` only uses a small part of the entire ML Flow project (
 - The original Github and Circleci actions have been disabled in this fork (the relevant directories are renamed to `disabled--{circleci, github-actions}`).
 - New Github actions are in the `.github` directory.
 
-Root directory for MLFlow front end: [mlflow/mlflow/server/js/](mlflow/mlflow/server/js/)
+Root directory for MLFlow front end codes:
+[mlflow/mlflow/server/js/](https://github.com/pynb-dag-runner/mlflow/tree/static_mlflow/mlflow/server/js/)
 
 ### Main branches in this repo
 - `master`: MLFlow original history up to 2/2022 (commit `2078937040654cf79d7c4c065f994ba537568561`) when the repo was forked.

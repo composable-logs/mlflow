@@ -10,8 +10,8 @@ This makes it possible to run data/ml pipelines on serverless/ephemeral infrastr
 That is, it makes possible to track and report on experiments without a backend API or SQL database.
 A typical use case is to run pipelines on CI/CD infrastructure.
 
-The modified version of MLFlow in this repo loads all data from a static JSON file, and static assets are loaded separately over https.
-Thus, deploying the modified MLFlow UI only requires static web hosting.
+The modified version of MLFlow in this repo loads all data from a static JSON file, and static assets (like images) are loaded separately.
+Thus, deploying the modified MLFlow UI only requires only static web hosting.
 
 **[Main project documentation](https://pynb-dag-runner.github.io/pynb-dag-runner/)**
 

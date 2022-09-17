@@ -86,7 +86,7 @@ Unlikely without significant refactorings.
 - The unit tests have not been updated.
 - Due to large number of changes, merging the current modifications might not make sense.
   It would complicate the main code base for an edge use case.
-- The MLFlow repo contain an open and inactive feature request from ["Freeze" experiments in ui to static html site](https://github.com/mlflow/mlflow/issues/4645#issuecomment-1121478040) (8/2021).
+- The MLFlow repo contain an open and inactive feature request from ["Freeze" experiments in ui to static html site](https://github.com/mlflow/mlflow/issues/4645) (8/2021).
 
 ## License
 

@@ -3,8 +3,8 @@
 
 <div align="center">
 
-  <!-- 
-    -- Need an empty line above: https://stackoverflow.com/a/70293384 
+  <!--
+    -- Need an empty line above: https://stackoverflow.com/a/70293384
     -- First <a href>..</a> also should be on one line
     -->
   <a href="https://github.com/pynb-dag-runner/mlflow#license">![license=apache2](https://img.shields.io/github/license/pynb-dag-runner/mlflow?style=flat-square)</a>
@@ -96,3 +96,7 @@ Please see [LICENSE.txt](LICENSE.txt).
 The contributions in this repo copyright Matias Dahl 2022 are also released under the Apache 2 license.
 
 The intent is that the original MLFlow codebase and modifications can be combined and released and distributed under the terms of the Apache 2 license.
+
+---
+
+Please note that the Python package linked above contains compiled assets covered by various licenses.

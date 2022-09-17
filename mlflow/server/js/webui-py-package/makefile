@@ -30,11 +30,13 @@ build-wheel[in-docker]: | env_PYTHON_PACKAGE_RELEASE_TARGET env_ASSETS_PATH
 	        DOCKER_ARGS=" \
 	            -e PYTHON_PACKAGE_RELEASE_TARGET \
 	            --volume $$(pwd)/../:/webui-py-package \
-	            --volume ${ASSETS_PATH}:/assets \
+	            --volume $$(pwd)/../../../../..:/repo-root:ro \
+	            --volume ${ASSETS_PATH}:/assets:ro \
 	            --workdir /webui-py-package \
 	        " \
 	        DOCKER_COMMAND="( \
 	            ASSETS_PATH='/assets' \
+	            README_FILEPATH='/repo-root/README.md' \
 	            make build-wheel \
 	        )"; \
 	)

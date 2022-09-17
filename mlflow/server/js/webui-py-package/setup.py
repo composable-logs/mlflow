@@ -30,10 +30,13 @@ elif PYTHON_PACKAGE_RELEASE_TARGET == "main-release":
     pass
 
 else:
-    raise Exception(
-        f"Unknown PYTHON_PACKAGE_RELEASE_TARGET={PYTHON_PACKAGE_RELEASE_TARGET}"
-    )
+    raise Exception(f"Unknown PYTHON_PACKAGE_RELEASE_TARGET={PYTHON_PACKAGE_RELEASE_TARGET}")
 
+README_FILEPATH = os.environ["README_FILEPATH"]
+
+# ---
+
+print("setup.py: README_FILEPATH                 : ", README_FILEPATH)
 print("setup.py: ASSETS_PATH                     : ", ASSETS_PATH)
 print("setup.py: PYTHON_PACKAGE_RELEASE_TARGET   : ", PYTHON_PACKAGE_RELEASE_TARGET)
 print("setup.py: PYTHON_PACKAGE_VERSION          : ", PYTHON_PACKAGE_VERSION)
@@ -42,6 +45,7 @@ print("setup.py: PYTHON_PACKAGE_VERSION          : ", PYTHON_PACKAGE_VERSION)
 
 OutputDirectoryPath = Any
 InputFilepath = Any
+
 
 def _list_assets_files(assets: Path) -> List[Tuple[OutputDirectoryPath, List[InputFilepath]]]:
     """
@@ -66,8 +70,7 @@ def _list_assets_files(assets: Path) -> List[Tuple[OutputDirectoryPath, List[Inp
 
     if not assets.is_dir():
         raise Exception(
-            f"Please add files under {assets} directory before building "
-            "{PYTHON_PACKAGE_NAME}!"
+            f"Please add files under {assets} directory before building {PYTHON_PACKAGE_NAME}!"
         )
 
     files = [f for f in assets.glob("**/*") if f.is_file()]
@@ -105,17 +108,17 @@ setup(
     name=PYTHON_PACKAGE_NAME,
     author="Matias Dahl (based on a modified version of the MLFlow project)",
     description=(
-        "This Python package contain compiled Javascript code from "
-        "various sources and with different licenses; "
-        "For details, please see the linked documentation and source repo "
-        "https://github.com/pynb-dag-runner/mlflow and "
-        "https://github.com/pynb-dag-runner/mlflow/pull/2"
+        "This Python package contain compiled web assets for a fork "
+        "of the MLFlow front end."
+        "It is modified so that it can be deployed as a static website without a backend."
     ),
+    long_description=Path(README_FILEPATH).read_text(),
+    long_description_content_type="text/markdown",
     author_email="matias.dahl@iki.fi",
     license="Various, see the description",
     classifiers=[],
     url="https://pynb-dag-runner.github.io/pynb-dag-runner/",
     version=PYTHON_PACKAGE_VERSION,
     packages=find_packages(),
-    data_files=_list_assets_files(assets = Path(ASSETS_PATH)),
+    data_files=_list_assets_files(assets=Path(ASSETS_PATH)),
 )

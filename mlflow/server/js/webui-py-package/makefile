@@ -3,7 +3,7 @@ SHELL := /bin/bash
 
 # Note: This should run in the same directory as the makefile
 
-# # --- Helper tasks ---
+# --- Helper tasks ---
 
 env_%:
 	@# Check that a variable is defined, see stackoverflow.com/a/7367903

@@ -19,6 +19,9 @@ ${DOCKER_IMAGE_BUILD_FILE}: Dockerfile
 	mkdir -p $$(dirname $@)
 	touch $@
 
+	@echo "--- Docker images:"
+	@docker images
+
 # --- main tasks ---
 
 build-image: ${DOCKER_IMAGE_BUILD_FILE}

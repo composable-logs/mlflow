@@ -6,11 +6,11 @@ MAKEFILE_PATH := $(shell pwd)
 
 # --- helper tasks ---
 
-_clean-build-folder:
+.clean-build-folder:
 	@echo "--- Cleaning build folder with compiled static UI assets ..."
 	rm -rf build
 
-_npm-install:
+.npm-install:
 	@echo "--- Installing dependencies ..."
 	time npm install
 
@@ -50,7 +50,7 @@ dev/start-sqlite-web-ui:
 	pip3 install sqlite-web==0.4.0
 	sqlite_web --port 5012 /repo-root/backend/sqlite.db
 
-dev/serve-static-ui-in-watch-mode: | _clean-build-folder _npm-install
+dev/serve-static-ui-in-watch-mode: | .clean-build-folder .npm-install
 	# There are various env-settings in package.json for "npm start-web";
 	#
 	# -----------------------------
@@ -109,7 +109,7 @@ dev/serve-static-ui-in-watch-mode[in-docker]:
 
 # --- tasks building static UI assets ---
 
-build-static-ui-assets: | _clean-build-folder _npm-install
+build-static-ui-assets: | .clean-build-folder .npm-install
 	@echo "--- Compiling static assets for web UI ..."
 	HOST_STATIC_SITE=true npm run build
 
@@ -142,5 +142,5 @@ webui-py-package/build-wheel[in-docker]:
 	(\
 	    cd webui-py-package; \
 	    make build-wheel[in-docker] \
-	        ASSETS_PATH=${MAKEFILE_PATH}/build/.;
+	        ASSETS_PATH=${MAKEFILE_PATH}/build/.; \
 	)

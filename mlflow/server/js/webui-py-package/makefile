@@ -5,25 +5,24 @@ SHELL := /bin/bash
 
 # --- Helper tasks ---
 
-env_%:
+.env_%:
 	@# Check that a variable is defined, see stackoverflow.com/a/7367903
 	@if [[ -z "${$*}" ]]; then exit 1; fi
 
-# --- Main tasks ---
-
-clean:
+.clean:
+	@echo "--- Cleaning all output build folders for 'pynb_dag_runner_webui' ..."
 	rm -rf build dist pynb_dag_runner_webui.egg-info
 
-build-wheel: | env_PYTHON_PACKAGE_RELEASE_TARGET env_ASSETS_PATH
-	@make clean
+# --- Main tasks ---
 
+build-wheel: | .env_PYTHON_PACKAGE_RELEASE_TARGET .env_ASSETS_PATH
 	@python3 setup.py bdist_wheel
 
 	@echo "----------------- Output files in ./dist directory -----------------"
 	@find ./dist/ -type f
 	@echo "--------------------------------------------------------------------"
 
-build-wheel[in-docker]: | env_PYTHON_PACKAGE_RELEASE_TARGET env_ASSETS_PATH
+build-wheel[in-docker]: | .env_PYTHON_PACKAGE_RELEASE_TARGET .env_ASSETS_PATH .clean
 	(\
 	    cd docker; \
 	    make run[in-docker] \

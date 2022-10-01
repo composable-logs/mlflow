@@ -1,4 +1,5 @@
 .PHONY: *
+SHELL := /bin/bash
 
 DOCKER_IMAGE_NAME := node-14-x-docker-image
 

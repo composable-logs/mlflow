@@ -1,5 +1,7 @@
 .PHONY: *
 
+SHELL := /bin/bash
+
 # Note:
 # All commands should be executed in the same directory as this makefile.
 MAKEFILE_PATH := $(shell pwd)
@@ -51,6 +53,8 @@ dev/start-sqlite-web-ui:
 	sqlite_web --port 5012 /repo-root/backend/sqlite.db
 
 dev/serve-static-ui-in-watch-mode: | .clean-build-folder .npm-install
+	# Serve static website in watch mode on localhost:3010
+	#
 	# There are various env-settings in package.json for "npm start-web";
 	#
 	# -----------------------------
@@ -88,12 +92,6 @@ dev/serve-static-ui-in-watch-mode: | .clean-build-folder .npm-install
 	)
 
 dev/serve-static-ui-in-watch-mode[in-docker]:
-	# Docker:ized version of "watch-ui"-task.
-	# This must be executed in the same directory as this makefile.
-	#
-	# the below will install npm packages in mounted directory first time run
-	#
-	# Static website served in watch mode on localhost:3010
 	( \
 	    cd docker; \
 	    make run[in-docker] \
@@ -117,7 +115,6 @@ build-static-ui-assets: | .clean-build-folder .npm-install
 	tree --du -h --sort=size build
 
 build-static-ui-assets[in-docker]:
-	# Docker:ized version of "build-static-ui"-task.
 	( \
 	    cd docker; \
 	    make run[in-docker] \

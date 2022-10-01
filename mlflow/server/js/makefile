@@ -1,5 +1,21 @@
-.ONESHELL:
 .PHONY: *
+
+SHELL := /bin/bash
+
+# Note:
+# All commands should be executed in the same directory as this makefile.
+MAKEFILE_PATH := $(shell pwd)
+
+# --- helper tasks ---
+
+.clean-build-folder:
+	@echo "--- Cleaning build folder with compiled static UI assets ..."
+	rm -rf build
+
+.npm-install:
+	@echo "--- Installing dependencies ..."
+	time npm install
+
 
 # --- dev related tasks (for interactive development)
 #
@@ -36,9 +52,9 @@ dev/start-sqlite-web-ui:
 	pip3 install sqlite-web==0.4.0
 	sqlite_web --port 5012 /repo-root/backend/sqlite.db
 
-dev/serve-static-ui-in-watch-mode:
-	# Run "npm install" before this
-
+dev/serve-static-ui-in-watch-mode: | .clean-build-folder .npm-install
+	# Serve static website in watch mode on localhost:3010
+	#
 	# There are various env-settings in package.json for "npm start-web";
 	#
 	# -----------------------------
@@ -75,62 +91,43 @@ dev/serve-static-ui-in-watch-mode:
 	    npm start \
 	)
 
-	# ---
-	# Note: sometimes it is necessary to kill the UI server. The below can
-	# be used to kill process(es) listening on a port eg 3001. But, this may crash
-	# VS Code if running a dev-container setup.
-	#apt install -y lsof
-	#kill -9 $(lsof -i:3001 -t)
-
 dev/serve-static-ui-in-watch-mode[in-docker]:
-	# Docker:ized version of "watch-ui"-task.
-	# This must be executed in the same directory as this makefile.
-	#
-	# the below will install npm packages in mounted directory first time run
-	#
-	# Static website served in watch mode on localhost:3010
-	docker run -it --rm \
-	    --volume $$(pwd):/mlflow-server-js \
-	    --publish 3010:3010 \
-	    ui_build_image \
-	    bash -c "( \
-	        cd /mlflow-server-js/; \
-	        time npm install; \
-	        make dev/serve-static-ui-in-watch-mode; \
-	    )"
+	( \
+	    cd docker; \
+	    make run[in-docker] \
+	        DOCKER_ARGS=" \
+	            --volume ${MAKEFILE_PATH}:/mlflow-server-js \
+	            --workdir /mlflow-server-js \
+	            --publish 3010:3010 \
+	        " \
+	        DOCKER_COMMAND=" \
+	            make dev/serve-static-ui-in-watch-mode; \
+	        "; \
+	)
 
 # --- tasks building static UI assets ---
 
-build-static-ui:
-	# should run in the same directory as this makefile
-	@echo "--- Cleaning build folder ..."
-	rm -rf build
-	@echo "--- Compiling UI ..."
+build-static-ui-assets: | .clean-build-folder .npm-install
+	@echo "--- Compiling static assets for web UI ..."
 	HOST_STATIC_SITE=true npm run build
 
-	@echo "--- Locatation of ./build folder: ($$(pwd))"
 	@echo "--- Content and size of ./build-folder"
-	find build
-	du -hs build/*
+	tree --du -h --sort=size build
 
-docker-build-image-for-build-static-ui:
-	docker build -f Dockerfile -t ui_build_image .
+build-static-ui-assets[in-docker]:
+	( \
+	    cd docker; \
+	    make run[in-docker] \
+	        DOCKER_ARGS=" \
+	            --volume ${MAKEFILE_PATH}:/mlflow-server-js \
+	            --workdir /mlflow-server-js \
+	        " \
+	        DOCKER_COMMAND=" \
+	            make build-static-ui-assets; \
+	        "; \
+	)
 
-docker-build-static-ui:
-	# Docker:ized version of "build-static-ui"-task.
-	# This must be executed in the same directory as this makefile.
-
-	# the below will install npm packages in mounted directory first time run
-	docker run -t --rm \
-	    --volume $$(pwd):/mlflow-server-js \
-	    ui_build_image \
-	    bash -c "( \
-	        cd /mlflow-server-js/; \
-	        time npm install; \
-	        time make build-static-ui; \
-	    )"
-
-# --- 'webui-py-package' ---
+# --- 'webui-py-package' tasks ---
 # Tasks to build Python package with compiled static website assets.
 
 webui-py-package/docker/build-image:
@@ -140,7 +137,7 @@ webui-py-package/build-wheel[in-docker]:
 	@# This command assumes that the ./build folder contains the compiled assets
 	@# and these are included in the Python package.
 	(\
-	    export ASSETS_PATH=$$(pwd)/build/.; \
 	    cd webui-py-package; \
-	    make build-wheel[in-docker];
+	    make build-wheel[in-docker] \
+	        ASSETS_PATH=${MAKEFILE_PATH}/build/.; \
 	)

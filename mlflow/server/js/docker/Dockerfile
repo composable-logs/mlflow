@@ -1,6 +1,6 @@
 FROM ubuntu:20.04
 
-# Docker file with build environment for ML Flow UI
+# Docker file for dev+build environment for modified MLFlow UI
 
 # Notes:
 # - git needed to install "json-bigint" package directly from the
@@ -8,8 +8,7 @@ FROM ubuntu:20.04
 # - The ca-cert package is needed by curl; see
 #   https://stackoverflow.com/questions/3160909
 #
-# The curl command below set ups Node.JS version 14.19 for installation.
-# See
+# The below installs Node.JS version 14.19. This is based on:
 #  - mlflow repo root Dockerfile; \
 #  - https://github.com/nodesource/distributions#debinstall; \
 #
@@ -21,8 +20,11 @@ RUN apt-get update --quiet -y && \
         make \
         curl \
         git \
-        make \
+        tree \
+        time \
         ca-certificates && \
     curl -fsSL https://deb.nodesource.com/setup_14.x | bash - && \
     apt-get update --quiet -y && \
     apt-get install --quiet -y nodejs
+
+ENTRYPOINT ["/bin/bash", "-c"]

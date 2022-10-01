@@ -26,11 +26,11 @@ jobs:
 
       - name: "Compile static UI: build Docker image"
         run: |
-          make docker-build-image-for-build-static-ui
+          (cd docker; make build-image;)
 
       - name: "Compile static UI: Compile front end code"
         run: |
-          make docker-build-static-ui
+          make build-static-ui-assets[in-docker]
 
       - name: "webui-py-package: build Docker image"
         run: |

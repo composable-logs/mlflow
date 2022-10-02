@@ -15,7 +15,6 @@ class RemotelyFetchedMermaidView extends Component {
   }
 
   static propTypes = {
-    // runUuid: PropTypes.string.isRequired,
     path: PropTypes.string.isRequired,
     artifactRootUri: PropTypes.string.isRequired,
     getArtifact: PropTypes.func,

@@ -19,7 +19,8 @@ import { CollapsibleSection } from '../../common/components/CollapsibleSection';
 import { EditableNote } from '../../common/components/EditableNote';
 import { setTagApi, deleteTagApi } from '../actions';
 import { PageHeader, OverflowMenu } from '../../shared/building_blocks/PageHeader';
-import { DataBacklinkFooter } from '../static-data/UIConstants.js'
+import { DataBacklinkFooter } from '../static-data/UIConstants.js';
+import RemotelyFetchedMermaidView from '../../experiment-tracking/components/artifact-view-components/RemotelyFetchedMermaidView';
 
 export class RunViewImpl extends Component {
   static propTypes = {
@@ -384,43 +385,89 @@ export class RunViewImpl extends Component {
               <textarea className='run-command text-area' readOnly value={runCommand} />
             </CollapsibleSection>
           ) : null}
-          <CollapsibleSection
-            title={
-              <span>
-                <FormattedMessage
-                  defaultMessage='Description'
-                  description='Label for the notes editable content for the experiment run'
-                />
-                {!process.env.HOST_STATIC_SITE && !showNoteEditor && (
-                  <>
-                    {' '}
-                    <Button
-                      type='link'
-                      onClick={this.startEditingDescription}
-                      data-test-id='edit-description-button'
-                    >
-                      <FormattedMessage
-                        defaultMessage='Edit'
-                        // eslint-disable-next-line max-len
-                        description='Text for the edit button next to the description section title on the run view'
-                      />
-                    </Button>
-                  </>
-                )}
-              </span>
-            }
-            forceOpen={showNoteEditor}
-            defaultCollapsed={!noteContent}
-            onChange={this.handleCollapseChange('notes')}
-            data-test-id='run-notes-section'
-          >
-            <EditableNote
-              defaultMarkdown={noteContent}
-              onSubmit={this.handleSubmitEditNote}
-              onCancel={this.handleCancelEditNote}
-              showEditor={showNoteEditor}
-            />
-          </CollapsibleSection>
+
+          {process.env.HOST_STATIC_SITE ? null :
+            <CollapsibleSection
+              title={
+                <span>
+                  <FormattedMessage
+                    defaultMessage='Description'
+                    description='Label for the notes editable content for the experiment run'
+                  />
+                  {!process.env.HOST_STATIC_SITE && !showNoteEditor && (
+                    <>
+                      {' '}
+                      <Button
+                        type='link'
+                        onClick={this.startEditingDescription}
+                        data-test-id='edit-description-button'
+                      >
+                        <FormattedMessage
+                          defaultMessage='Edit'
+                          // eslint-disable-next-line max-len
+                          description='Text for the edit button next to the description section title on the run view'
+                        />
+                      </Button>
+                    </>
+                  )}
+                </span>
+              }
+              forceOpen={showNoteEditor}
+              defaultCollapsed={!noteContent}
+              onChange={this.handleCollapseChange('notes')}
+              data-test-id='run-notes-section'
+            >
+              <EditableNote
+                defaultMarkdown={noteContent}
+                onSubmit={this.handleSubmitEditNote}
+                onCancel={this.handleCancelEditNote}
+                showEditor={showNoteEditor}
+              />
+            </CollapsibleSection>
+          }
+
+          {process.env.HOST_STATIC_SITE ?
+            <CollapsibleSection
+              title={
+                <span>
+                  <FormattedMessage
+                    defaultMessage='Task dependency graph'
+                    description='Mermaid rendered graph of task dependencies for pipeline'
+                  />
+                </span>
+              }
+              defaultCollapsed={false}
+              onChange={this.handleCollapseChange('task-dependency-dag')}
+              data-test-id='run-task-dependency-dag-section'
+            >
+              <RemotelyFetchedMermaidView
+                artifactRootUri={run.getArtifactUri()}
+                path="dag.mmd"
+              />
+            </CollapsibleSection>
+          : null}
+
+          {process.env.HOST_STATIC_SITE ?
+            <CollapsibleSection
+              title={
+                <span>
+                  <FormattedMessage
+                    defaultMessage='Gantt diagram'
+                    description='Mermaid rendered Gantt diagram for task runtimes'
+                  />
+                </span>
+              }
+              defaultCollapsed={false}
+              onChange={this.handleCollapseChange('task-gantt-runtimes-diagram')}
+              data-test-id='run-task-gantt-section'
+            >
+              <RemotelyFetchedMermaidView
+                artifactRootUri={run.getArtifactUri()}
+                path="gantt.mmd"
+              />
+            </CollapsibleSection>
+          : null}
+
           <CollapsibleSection
             defaultCollapsed
             title={this.renderSectionTitle(

@@ -40,6 +40,7 @@ export const TEXT_EXTENSIONS = new Set([
   MLPROJECT_FILE_NAME.toLowerCase(),
   MLMODEL_FILE_NAME.toLowerCase(),
   'jsonnet',
+  'mmd', // mermaid input file
 ]);
 export const HTML_EXTENSIONS = new Set(['html']);
 export const MAP_EXTENSIONS = new Set(['geojson']);

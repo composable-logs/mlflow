@@ -1,0 +1,10 @@
+/*
+ * Overflow mermaid diagrams that do not fit on screen
+ * (with horizontal scroll bar).
+ *
+ * See https://github.com/mermaid-js/mermaid/issues/652
+ */
+.mermaid-container {
+  width: 100%;
+  overflow-x: scroll;
+}

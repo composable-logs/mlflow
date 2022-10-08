@@ -426,7 +426,7 @@ export class RunViewImpl extends Component {
             </CollapsibleSection>
           }
 
-          {process.env.HOST_STATIC_SITE ?
+          {(process.env.HOST_STATIC_SITE && this.props.runName === 'pipeline') ?
             <CollapsibleSection
               title={
                 <span>
@@ -447,7 +447,7 @@ export class RunViewImpl extends Component {
             </CollapsibleSection>
           : null}
 
-          {process.env.HOST_STATIC_SITE ?
+          {(process.env.HOST_STATIC_SITE && this.props.runName === 'pipeline') ?
             <CollapsibleSection
               title={
                 <span>

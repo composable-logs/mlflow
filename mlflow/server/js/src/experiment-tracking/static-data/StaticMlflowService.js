@@ -34,8 +34,9 @@ const reformatEntry = (runId, entry, experimentId) => {
       experiment_id: (!!experimentId ? experimentId : StaticDataLoader.LOOKUP_TASK_SOURCE_NAME_TO_IDX.get(sourceName)),
       user_id: "info.user_id",
       status: entry.is_success ? "FINISHED" : "FAILED",
-      start_time: entry.start_time_epoch_us / 1000,
-      end_time: entry.end_time_epoch_us / 1000,
+      // Convert ISO8601 to unix epoch [ms]
+      start_time: new Date(entry.timing_start_iso8601).getTime(),
+      end_time: new Date(entry.timing_end_iso8601).getTime(),
       artifact_uri: entry.artifacts_location,
       lifecycle_stage: "active",
       run_id: runId
@@ -143,7 +144,7 @@ const reformatEntry = (runId, entry, experimentId) => {
   if (entry.type === "task") {
     result.data.tags.push({
       key: "mlflow.parentRunId",
-      value: StaticDataLoader.DATA.get(runId).parent_id
+      value: StaticDataLoader.DATA.get(runId).parent_span_id
     });
   }
 
@@ -202,7 +203,7 @@ class StaticDataLoaderClass {
         const result = [];
 
         staticData.forEach((e) => {
-          if ((e.type === "task") && (e.parent_id === pipelineId)) {
+          if ((e.type === "task") && (e.parent_span_id === pipelineId)) {
             result.push(e.span_id);
           }
         });
@@ -388,15 +389,12 @@ export class StaticMlflowService {
       }
     } else {
       const expId = one(experiment_ids); // will crash if searching for more experimentId:s
-      // eg expId="eda"
-
-      const validSources = new Set(experiment_ids.map(eid => StaticDataLoader.LOOKUP_IDX_TO_TASK_SOURCE_NAME.get(eid)));
-      // eg validSources="notebooks/eda.py"
+      // eg expId="eda", "summary"
 
       // find runs with this source
       result = ([...StaticDataLoader.DATA.entries()]
         .filter(([runId, v]) => v.type === "task")
-        .filter(([runId, v]) => validSources.has(v["attributes"]["task.notebook"]))
+        .filter(([runId, v]) => v.task_id === expId)
         .map(([runId, v]) => reformatEntry(runId, v, expId))
       );
     }

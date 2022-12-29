@@ -8,16 +8,6 @@ const one = (xs) => {
   }
 };
 
-const getTaskId = (entry) => {
-  // The below logic implements:
-  //   "notebooks/ingest.py" -> "ingest"
-  //
-  // This could potentially be overwritten with "taskId" field etc in the entry dict.
-  const notebookName = entry["attributes"]["task.notebook"];
-  const defaultTaskId = notebookName.split("/").at(-1).replace(/.py/g, "")
-  return defaultTaskId
-};
-
 const reformatEntry = (runId, entry, experimentId) => {
   const isPipeline = entry.type === "pipeline";
 
@@ -226,7 +216,7 @@ class StaticDataLoaderClass {
       (staticData
         .filter((entry) => entry.type === "task")
         .forEach((entry) => {
-          const entryExperimentId = getTaskId(entry);
+          const entryExperimentId = entry.task_id;
           if (!result2.has(entryExperimentId)) {
             result2.set(entryExperimentId, entry["attributes"]["task.notebook"]);
           }

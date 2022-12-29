@@ -28,7 +28,7 @@ const reformatEntry = (runId, entry, experimentId) => {
       start_time: new Date(entry.timing_start_iso8601).getTime(),
       end_time: new Date(entry.timing_end_iso8601).getTime(),
       // asset directory structure could be included in JSON to keep control in one place
-      artifact_uri: `/artifacts/${entry.type}/${runId}`,
+      artifact_uri: `artifacts/${entry.type}/${runId}`,
       lifecycle_stage: "active",
       run_id: runId
     },

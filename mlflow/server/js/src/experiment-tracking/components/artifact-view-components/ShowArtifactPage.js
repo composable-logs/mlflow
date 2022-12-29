@@ -168,7 +168,7 @@ const getFileTooLargeView = () => {
 
 export const getSrc = (path, runUuid, artifactRootUri) => {
   if (process.env.HOST_STATIC_SITE) {
-    return `pipeline-artifacts/${artifactRootUri}/${path}`;
+    return `${artifactRootUri}/${path}`;
   } else {
     const basePath = 'get-artifact';
     return `${basePath}?path=${encodeURIComponent(path)}&run_uuid=${encodeURIComponent(runUuid)}`;

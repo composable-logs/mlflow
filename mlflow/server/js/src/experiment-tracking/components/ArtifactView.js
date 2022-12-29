@@ -274,10 +274,8 @@ export class ArtifactViewImpl extends Component {
       // `initialSelectedArtifactPath` is set.
       if ("notebook.html" in this.props.artifactNode.children) {
         this.setSelectedArtifactPath("notebook.html")
-      } else if ("run.json" in this.props.artifactNode.children) {
-        this.setSelectedArtifactPath("run.json")
-      } else if ("pipeline.json" in this.props.artifactNode.children) {
-        this.setSelectedArtifactPath("pipeline.json")
+      } else if ("run-time-metadata.json" in this.props.artifactNode.children) {
+        this.setSelectedArtifactPath("run-time-metadata.json")
       }
     } else {
       // set path provided in url

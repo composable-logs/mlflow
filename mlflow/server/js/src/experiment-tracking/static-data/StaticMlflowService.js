@@ -27,7 +27,8 @@ const reformatEntry = (runId, entry, experimentId) => {
       // Convert ISO8601 to unix epoch [ms]
       start_time: new Date(entry.timing_start_iso8601).getTime(),
       end_time: new Date(entry.timing_end_iso8601).getTime(),
-      artifact_uri: entry.artifacts_location,
+      // asset directory structure could be included in JSON to keep control in one place
+      artifact_uri: `/artifacts/${entry.type}/${runId}`,
       lifecycle_stage: "active",
       run_id: runId
     },
@@ -50,7 +51,7 @@ const reformatEntry = (runId, entry, experimentId) => {
       },
       {
         key: "mlflow.runName",
-        value: entry.type, // "pipeline", "task", or "run"
+        value: entry.type, // "pipeline", "task"
       },
       // extra top keys are shown in main UI list of runs
       {

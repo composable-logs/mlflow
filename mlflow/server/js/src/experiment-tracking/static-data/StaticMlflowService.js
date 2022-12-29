@@ -8,16 +8,6 @@ const one = (xs) => {
   }
 };
 
-const getTaskId = (entry) => {
-  // The below logic implements:
-  //   "notebooks/ingest.py" -> "ingest"
-  //
-  // This could potentially be overwritten with "taskId" field etc in the entry dict.
-  const notebookName = entry["metadata"]["attributes"]["task.notebook"];
-  const defaultTaskId = notebookName.split("/").at(-1).replace(/.py/g, "")
-  return defaultTaskId
-};
-
 const reformatEntry = (runId, entry, experimentId) => {
   const isPipeline = entry.type === "pipeline";
 
@@ -25,23 +15,20 @@ const reformatEntry = (runId, entry, experimentId) => {
   if (isPipeline) {
     sourceName = "Pipeline run";
   } else {
-    sourceName = entry["metadata"]["attributes"]["task.notebook"] || "Unknown";
+    sourceName = entry["attributes"]["task.notebook"] || "Unknown";
   }
-
-  const isSucess = (entry.metadata.status && entry.metadata.status.status_code && (entry.metadata.status.status_code === "OK"));
 
   const result = {
     info: {
       run_uuid: runId,
       experiment_id: (!!experimentId ? experimentId : StaticDataLoader.LOOKUP_TASK_SOURCE_NAME_TO_IDX.get(sourceName)),
       user_id: "info.user_id",
-      // TODO: pipelines-summaries should also have status in data
-      // Now pipeline runs are always shown as successful (green icon) even
-      // if they contain failed tasks
-      status: (isPipeline || isSucess) ? "FINISHED" : "FAILED",
-      start_time: entry.metadata.start_time,
-      end_time: entry.metadata.end_time,
-      artifact_uri: entry.artifacts_location,
+      status: entry.is_success ? "FINISHED" : "FAILED",
+      // Convert ISO8601 to unix epoch [ms]
+      start_time: new Date(entry.timing_start_iso8601).getTime(),
+      end_time: new Date(entry.timing_end_iso8601).getTime(),
+      // asset directory structure could be included in JSON to keep control in one place
+      artifact_uri: `/artifacts/${entry.type}/${runId}`,
       lifecycle_stage: "active",
       run_id: runId
     },
@@ -64,7 +51,7 @@ const reformatEntry = (runId, entry, experimentId) => {
       },
       {
         key: "mlflow.runName",
-        value: entry.type, // "pipeline", "task", or "run"
+        value: entry.type, // "pipeline", "task"
       },
       // extra top keys are shown in main UI list of runs
       {
@@ -98,7 +85,7 @@ const reformatEntry = (runId, entry, experimentId) => {
         })()
       }
       ],
-      params: [...Object.entries(entry.metadata.attributes)
+      params: [...Object.entries(entry.attributes)
         .map(([k, v]) => ({ key: k, value: v }))
       ],
       metrics: []
@@ -112,7 +99,7 @@ const reformatEntry = (runId, entry, experimentId) => {
   //
   // Also, this only keeps track of *one value* for the metric; ie.
   // this does not support logging a loss function during training.
-  if (!!entry.metadata.logged_values) {
+  if (!!entry.logged_values) {
     const log_kv = (k, v) => {
       if (Number(v) !== v) {
         console.log(`Skipping too complex logged value ${k}=${v}`);
@@ -123,12 +110,12 @@ const reformatEntry = (runId, entry, experimentId) => {
         key: k,
         value: v,
         // -- only one value --
-        timestamp: entry.metadata.start_time,
+        timestamp: entry.start_time_epoch_us / 1000,
         step: 0
       });
     };
 
-    Object.entries(entry.metadata.logged_values).forEach(([k, v]) => {
+    Object.entries(entry.logged_values).forEach(([k, v]) => {
       if ((v.type === "int") || (v.type === "float")) {
         log_kv(k, v.value);
       } else if ((v.type === "json") && Array.isArray(v.value)) {
@@ -145,11 +132,10 @@ const reformatEntry = (runId, entry, experimentId) => {
     });
   }
 
-  if (entry.type === "run") {
-    const parentTaskId = StaticDataLoader.DATA[runId].parent_id;
+  if (entry.type === "task") {
     result.data.tags.push({
       key: "mlflow.parentRunId",
-      value: StaticDataLoader.DATA[parentTaskId].parent_id
+      value: StaticDataLoader.DATA.get(runId).parent_span_id
     });
   }
 
@@ -173,7 +159,7 @@ class StaticDataLoaderClass {
   state;
 
   constructor() {
-    this.loaderPromise = getArtifactContent('ui_static_data.json');
+    this.loaderPromise = getArtifactContent('static_data.json');
 
     //
     // Note:
@@ -186,56 +172,59 @@ class StaticDataLoaderClass {
     // we initially just return "no data" (and we do not attempt to hide/disable
     // the main UI while data is loading).
     //
-    this.registerData("LOADING", {});
+    this.registerData("LOADING", []);
 
     this.loaderPromise.then((value) => {
       this.registerData("LOADED", JSON.parse(value));
     }).catch((err) => {
-      this.registerData("FAILED", {});
+      this.registerData("FAILED", []);
     });
   }
 
   registerData(state, staticData) {
     this.state = state;
-    this.DATA = staticData
 
-    this.ALL_PIPELINE_RUN_IDS = [...Object.entries(this.DATA)
-      .filter(([runId, v]) => v.type === "pipeline")
-      .map(([runId, v]) => runId)
-    ];
+    this.ALL_PIPELINE_RUN_IDS = (staticData
+      .filter((e) => e.type === "pipeline")
+      .map((e) => e.span_id)
+    );
 
     this.PIPELINE_ID_TO_CHILDREN_RUN_IDS = (() => (
       new Map(this.ALL_PIPELINE_RUN_IDS.map(pipelineId => {
         const result = [];
 
-        Object.entries(this.DATA).forEach(([vRunId, v]) => {
-          if ((v.type === "task") && (v.parent_id === pipelineId)) {
-            Object.entries(this.DATA).forEach(([wRunId, w]) => {
-              if ((w.type === "run") && (w.parent_id === vRunId)) {
-                result.push(wRunId);
-              }
-            });
+        staticData.forEach((e) => {
+          if ((e.type === "task") && (e.parent_span_id === pipelineId)) {
+            result.push(e.span_id);
           }
         });
         return [pipelineId, result];
       }))
     ))();
 
+    /**
+     * LOOKUP_IDX_TO_TASK_SOURCE_NAME:
+     *
+     *   "all-pipelines-runs" -> "All pipeline runs"
+     *   "benchmark-model" -> "notebooks/benchmark-model.py"
+     *   ...
+     */
     this.LOOKUP_IDX_TO_TASK_SOURCE_NAME = (() => {
-      // Note: keys/values in Maps are ordered in order of insertion
       const result1 = new Map();
-
       result1.set(this.ALL_PIPELINE_RUNS_ID, "All pipeline runs");
 
       const result2 = new Map();
-      Object.entries(this.DATA)
-        .filter(([runId, entry]) => entry.type === "task")
-        .forEach(([runId, entry]) => {
-          const entryExperimentId = getTaskId(entry);
+      (staticData
+        .filter((entry) => entry.type === "task")
+        .forEach((entry) => {
+          const entryExperimentId = entry.task_id;
           if (!result2.has(entryExperimentId)) {
-            result2.set(entryExperimentId, entry["metadata"]["attributes"]["task.notebook"]);
+            result2.set(entryExperimentId, entry["attributes"]["task.notebook"]);
           }
-      });
+        })
+      );
+
+      // Note: keys/values in Maps are ordered in order of insertion.
 
       // Sort by task names
       // See: https://stackoverflow.com/a/51242261
@@ -244,6 +233,7 @@ class StaticDataLoaderClass {
       return new Map([...result1, ...result2Sorted]);
     })();
 
+    // LOOKUP_TASK_SOURCE_NAME_TO_IDX = inverse of the previous map.
     this.LOOKUP_TASK_SOURCE_NAME_TO_IDX = new Map(
       [...this.LOOKUP_IDX_TO_TASK_SOURCE_NAME.entries()].map(([k, v]) => [v, k])
     );
@@ -272,6 +262,8 @@ class StaticDataLoaderClass {
 
       return { experiments };
     })();
+
+    this.DATA = new Map([...staticData.map((entry) => [entry.span_id, entry])]);
   }
 }
 
@@ -296,7 +288,7 @@ export class StaticMlflowService {
   }
 
   static getRunRawData(run_id) {
-    return StaticDataLoader.DATA[run_id];
+    return StaticDataLoader.DATA.get(run_id);
   }
 
   static getRun({
@@ -388,22 +380,14 @@ export class StaticMlflowService {
       }
     } else {
       const expId = one(experiment_ids); // will crash if searching for more experimentId:s
+      // eg expId="eda", "summary"
 
-      const validSources = new Set(experiment_ids.map(eid => StaticDataLoader.LOOKUP_IDX_TO_TASK_SOURCE_NAME.get(eid)));
-
-      // get parent Task id:s whose runs should be shown
-      const taskIds = new Set(Object.entries(StaticDataLoader.DATA)
+      // find runs with this source
+      result = ([...StaticDataLoader.DATA.entries()]
         .filter(([runId, v]) => v.type === "task")
-        .filter(([runId, v]) => validSources.has(v["metadata"]["attributes"]["task.notebook"]))
-        .map(([runId, v]) => runId)
-      );
-
-      // find all children (run:s) under these tasks
-      result = [...Object.entries(StaticDataLoader.DATA)
-        .filter(([runId, v]) => v.type === "run")
-        .filter(([runId, v]) => taskIds.has(v["parent_id"]))
+        .filter(([runId, v]) => v.task_id === expId)
         .map(([runId, v]) => reformatEntry(runId, v, expId))
-      ];
+      );
     }
 
     return new Promise((resolve, reject) => { resolve({ runs: result }); });

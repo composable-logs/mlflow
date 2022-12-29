@@ -620,6 +620,12 @@ function DateCellRenderer(props) {
     childrenIds,
     onExpand,
   } = props.data;
+
+  // Despite name, this renders first column in list view of ML Flow
+  //   - checkmark to expand child runs
+  //   - was run successful
+  //   - time since run
+
   return (
     <div>
       {hasExpander ? (

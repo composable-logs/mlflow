@@ -105,6 +105,11 @@ dev/serve-static-ui-in-watch-mode[in-docker]:
 	        "; \
 	)
 
+dev/clean-public:
+	@echo "--- Deleting any untracked files in public folder ..."
+	git clean --force -d public
+	@echo "--- Done"
+
 # --- tasks building static UI assets ---
 
 build-static-ui-assets: | .clean-build-folder .npm-install

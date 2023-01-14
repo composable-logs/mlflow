@@ -7,7 +7,7 @@ from setuptools import setup, find_packages
 
 # ---
 
-PYTHON_PACKAGE_NAME = "pynb_dag_runner_webui"
+PYTHON_PACKAGE_NAME = "composable-logs-webui"
 
 # ASSETS_PATH is path to file assets to include into the Python package.
 # The files can have a nested directory structure.
@@ -117,7 +117,7 @@ setup(
     author_email="matias.dahl@iki.fi",
     license="Various, see the description",
     classifiers=[],
-    url="https://pynb-dag-runner.github.io/pynb-dag-runner/",
+    url="https://composable-logs.github.io/pynb-dag-runner/",
     version=PYTHON_PACKAGE_VERSION,
     packages=find_packages(),
     data_files=_list_assets_files(assets=Path(ASSETS_PATH)),

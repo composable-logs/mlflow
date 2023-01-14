@@ -10,8 +10,8 @@ SHELL := /bin/bash
 	@if [[ -z "${$*}" ]]; then exit 1; fi
 
 .clean:
-	@echo "--- Cleaning all output build folders for 'pynb_dag_runner_webui' ..."
-	rm -rf build dist pynb_dag_runner_webui.egg-info
+	@echo "--- Cleaning all output build folders for 'composable_logs_webui' ..."
+	rm -rf build dist composable_logs_webui.egg-info
 
 # --- Main tasks ---
 

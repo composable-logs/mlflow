@@ -7,12 +7,12 @@
     -- Need an empty line above: https://stackoverflow.com/a/70293384
     -- First <a href>..</a> also should be on one line
     -->
-  <a href="https://github.com/pynb-dag-runner/mlflow#license">![license=apache2](https://img.shields.io/github/license/pynb-dag-runner/mlflow?style=flat-square)</a>
-  <a href="https://github.com/pynb-dag-runner/mlflow/actions/workflows/cicd_main-release.yml">
-    ![ci/cd: main release to PyPI](https://github.com/pynb-dag-runner/mlflow/actions/workflows/cicd_main-release.yml/badge.svg)
+  <a href="https://github.com/composable-logs/mlflow#license">![license=apache2](https://img.shields.io/github/license/composable-logs/mlflow?style=flat-square)</a>
+  <a href="https://github.com/composable-logs/mlflow/actions/workflows/cicd_main-release.yml">
+    ![ci/cd: main release to PyPI](https://github.com/composable-logs/mlflow/actions/workflows/cicd_main-release.yml/badge.svg)
   </a>
-  <a href="https://pypi.org/project/pynb-dag-runner-webui/">
-    ![PyPI version](https://badge.fury.io/py/pynb-dag-runner-webui.svg)
+  <a href="https://pypi.org/project/composable-logs-webui/">
+    ![PyPI version](https://badge.fury.io/py/composable-logs-webui.svg)
   </a>
 
 </div>
@@ -70,10 +70,10 @@ For details, see the Github actions in this repo.
 
 ## Installation
 
-Install as Python package hosted on [PyPI](https://pypi.org/project/pynb-dag-runner-webui/):
+Install as Python package hosted on [PyPI](https://pypi.org/project/composable-logs-webui/):
 
 ```bash
-pip install pynb-dag-runner-webui --target /where/to/install
+pip install composable-logs-webui --target /where/to/install
 ```
 
 After installation the static assets for the modified MLFlow UI are in the directory `/where/to/install/assets`.

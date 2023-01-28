@@ -9,11 +9,11 @@ const one = (xs) => {
 };
 
 const reformatEntry = (runId, entry, experimentId) => {
-  const isPipeline = entry.type === "pipeline";
+  const isPipeline = entry.type === "workflow";
 
   var sourceName;
   if (isPipeline) {
-    sourceName = "Pipeline run";
+    sourceName = "Workflow run";
   } else {
     sourceName = entry["attributes"]["task.notebook"] || "Unknown";
   }
@@ -51,7 +51,7 @@ const reformatEntry = (runId, entry, experimentId) => {
       },
       {
         key: "mlflow.runName",
-        value: entry.type, // "pipeline", "task"
+        value: entry.type, // "workflow", "task"
       },
       // extra top keys are shown in main UI list of runs
       {
@@ -69,15 +69,15 @@ const reformatEntry = (runId, entry, experimentId) => {
               if (artifact_entries.length === 1) {
                 return [
                   `# ${header}`,
-                  `![${header}](./pipeline-artifacts/${entry.artifacts_location}/${filename})`
+                  `![${header}](./workflow-artifacts/${entry.artifacts_location}/${filename})`
                 ];
               } else {
                 return [];
               }
             };
             return [
-              ...addImage("DAG diagram of task dependencies in this pipeline", "dag-diagram.png"),
-              ...addImage("Gantt diagram of task runs in pipeline", "gantt-diagram.png")
+              ...addImage("DAG diagram of task dependencies in this workflow", "dag-diagram.png"),
+              ...addImage("Gantt diagram of task runs in workflow", "gantt-diagram.png")
             ].join("\n");
           } else {
             return "No description";
@@ -150,7 +150,7 @@ class StaticDataLoaderClass {
   LOOKUP_IDX_TO_TASK_SOURCE_NAME;
   LOOKUP_TASK_SOURCE_NAME_TO_IDX;
   STATIC_EXPERIMENTS;
-  ALL_PIPELINE_RUNS_ID = "all-pipelines-runs";
+  ALL_PIPELINE_RUNS_ID = "all-workflow-runs";
 
   // promise (for attaching callbacks)
   loaderPromise;
@@ -185,7 +185,7 @@ class StaticDataLoaderClass {
     this.state = state;
 
     this.ALL_PIPELINE_RUN_IDS = (staticData
-      .filter((e) => e.type === "pipeline")
+      .filter((e) => e.type === "workflow")
       .map((e) => e.span_id)
     );
 
@@ -205,13 +205,13 @@ class StaticDataLoaderClass {
     /**
      * LOOKUP_IDX_TO_TASK_SOURCE_NAME:
      *
-     *   "all-pipelines-runs" -> "All pipeline runs"
+     *   "all-workflow-runs" -> "All workflow runs"
      *   "benchmark-model" -> "notebooks/benchmark-model.py"
      *   ...
      */
     this.LOOKUP_IDX_TO_TASK_SOURCE_NAME = (() => {
       const result1 = new Map();
-      result1.set(this.ALL_PIPELINE_RUNS_ID, "All pipeline runs");
+      result1.set(this.ALL_PIPELINE_RUNS_ID, "All workflow runs");
 
       const result2 = new Map();
       (staticData

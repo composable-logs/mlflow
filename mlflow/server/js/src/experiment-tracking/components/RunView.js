@@ -426,13 +426,13 @@ export class RunViewImpl extends Component {
             </CollapsibleSection>
           }
 
-          {(process.env.HOST_STATIC_SITE && this.props.runName === 'pipeline') ?
+          {(process.env.HOST_STATIC_SITE && this.props.runName === 'workflow') ?
             <CollapsibleSection
               title={
                 <span>
                   <FormattedMessage
                     defaultMessage='Task dependency graph'
-                    description='Mermaid rendered graph of task dependencies for pipeline'
+                    description='Mermaid rendered graph of task dependencies for this workflow'
                   />
                 </span>
               }
@@ -447,7 +447,7 @@ export class RunViewImpl extends Component {
             </CollapsibleSection>
           : null}
 
-          {(process.env.HOST_STATIC_SITE && this.props.runName === 'pipeline') ?
+          {(process.env.HOST_STATIC_SITE && this.props.runName === 'workflow') ?
             <CollapsibleSection
               title={
                 <span>

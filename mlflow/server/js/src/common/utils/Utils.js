@@ -378,14 +378,14 @@ class Utils {
 
     var desc;
 
-    if (runEntry.type === 'pipeline') {
-      desc = 'Pipeline run';
+    if (runEntry.type === 'workflow') {
+      desc = 'Workflow run';
 
       var url;
       // eg. owner/repo-name
-      const ghRepoName = runAttributes['pipeline.github.repository'];
+      const ghRepoName = runAttributes['workflow.github.repository'];
       // eg. 1234567890
-      const ghRunId = runAttributes['pipeline.github.run_id'];
+      const ghRunId = runAttributes['workflow.github.run_id'];
 
       if (!!ghRepoName && !!ghRunId) {
         url = `https://github.com/${ghRepoName}/actions/runs/${ghRunId}`;
@@ -639,19 +639,19 @@ class Utils {
   static renderTrigger(runUuid) {
     if (process.env.HOST_STATIC_SITE) {
       const attributes = StaticMlflowService.getRunRawData(runUuid).attributes;
-      const ghEventName = attributes['pipeline.github.event_name'];
+      const ghEventName = attributes['workflow.github.event_name'];
 
       if (ghEventName === 'pull_request') {
-        const githubRepo = attributes['pipeline.github.repository'];
-        const prRef = attributes['pipeline.github.ref_name'];  // eg. 42/ref
+        const githubRepo = attributes['workflow.github.repository'];
+        const prRef = attributes['workflow.github.ref_name'];  // eg. 42/ref
         const url = `https://github.com/${githubRepo}/pull/${prRef}`;
 
         // see https://stackoverflow.com/a/1862219
         const desc = 'PR' + prRef.replace(/\D/g, '');
 
         // hover text branch -> target branch
-        const ghBaseRef = attributes['pipeline.github.base_ref'];
-        const ghHeadRef = attributes['pipeline.github.head_ref'];
+        const ghBaseRef = attributes['workflow.github.base_ref'];
+        const ghHeadRef = attributes['workflow.github.head_ref'];
         const hoverText = `${ghHeadRef} → ${ghBaseRef}`;
 
         return `<a href=${url} target='_blank' title='${hoverText}'>${desc}</a>`;
@@ -668,12 +668,12 @@ class Utils {
   static getBranch(runUuid) {
     if (process.env.HOST_STATIC_SITE) {
       const attributes = StaticMlflowService.getRunRawData(runUuid).attributes;
-      const ghEventName = attributes['pipeline.github.event_name'];
+      const ghEventName = attributes['workflow.github.event_name'];
 
       if (ghEventName === 'pull_request') {
-        return attributes['pipeline.github.head_ref'];
+        return attributes['workflow.github.head_ref'];
       } else {
-        return attributes['pipeline.github.ref_name'];
+        return attributes['workflow.github.ref_name'];
       }
     }
   }
@@ -683,13 +683,13 @@ class Utils {
     if (process.env.HOST_STATIC_SITE) {
       try {
         const attributes = StaticMlflowService.getRunRawData(runInfo.run_uuid).attributes;
-        const ghEventName = attributes['pipeline.github.event_name'];
+        const ghEventName = attributes['workflow.github.event_name'];
 
         if (ghEventName !== 'schedule') {
           // Do not return actor for scheduled runs. In this case, the actor
           // is the last person to modify the gha yaml definition. See
           // https://github.community/t/who-will-be-the-github-actor-when-a-workflow-runs-on-a-schedule/17369
-          return attributes['pipeline.github.actor'];
+          return attributes['workflow.github.actor'];
         }
       } catch (err) {
         return 'unknown';
@@ -707,8 +707,8 @@ class Utils {
   static renderVersionStaticGH(shortVersion, runUuid) {
     const attributes = StaticMlflowService.getRunRawData(runUuid).attributes;
 
-    const gitSha = attributes["pipeline.github.sha"];
-    const githubRepo = attributes["pipeline.github.repository"];
+    const gitSha = attributes["workflow.github.sha"];
+    const githubRepo = attributes["workflow.github.repository"];
 
     if (!!gitSha && !!githubRepo) {
       const linkString = shortVersion ? gitSha.substring(0, 6) : gitSha;

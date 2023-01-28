@@ -22,9 +22,9 @@
 The usual MLFlow front end (for experiment tracking) relies on a backend API for querying results about past experiments.
 
 The modified MLFlow project in this repo is part of the `pynb-dag-runner` project.
-This makes it possible to run data/ml pipelines on serverless/ephemeral infrastructure.
+This makes it possible to run data/ml workflows (or pipelines) on serverless/ephemeral infrastructure.
 That is, it makes possible to track and report on experiments without a backend API or SQL database.
-A typical use case is to run pipelines on CI/CD infrastructure.
+A typical use case is to run workflows on CI/CD infrastructure.
 
 The modified version of MLFlow in this repo loads all data from a static JSON file, and static assets (like images) are loaded separately.
 Thus, deploying the modified MLFlow UI only requires only static web hosting.
@@ -39,7 +39,7 @@ Thus, deploying the modified MLFlow UI only requires only static web hosting.
 
   [![Screenshot](https://pynb-dag-runner.github.io/pynb-dag-runner/live-demos/mnist-digits-demo-pipeline/screenshot-task-list.png)](https://pynb-dag-runner.github.io/mnist-digits-demo-pipeline/)
 
-- This demo is a task and experiment tracker for an mnist-digits ML training pipeline scheduled to run daily.
+- This demo is a task and experiment tracker for an mnist-digits ML training workflow scheduled to run daily.
   It uses no cloud infrastructure except services on Github (Github actions for compute, Build artifacts for storage, and Github Pages for reporting).
 
 ## Repo structure

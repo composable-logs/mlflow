@@ -117,7 +117,7 @@ setup(
     author_email="matias.dahl@iki.fi",
     license="Various, see the description",
     classifiers=[],
-    url="https://composable-logs.github.io/pynb-dag-runner/",
+    url="https://composable-logs.github.io/composable-logs/",
     version=PYTHON_PACKAGE_VERSION,
     packages=find_packages(),
     data_files=_list_assets_files(assets=Path(ASSETS_PATH)),

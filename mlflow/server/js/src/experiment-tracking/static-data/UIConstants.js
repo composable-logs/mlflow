@@ -7,9 +7,9 @@ export const DataBacklinkFooter = <div
     <p>This is a static site built using a modified version of MLflow that generates
     static web sites. The output has dynamic elements, but there is no api backend or
     database. Thus, after the site has been built it can be served from a static web host
-    service (like eg. Github Pages). For more details, please see the pynb-dag-runner 
+    service (like eg. Github Pages). For more details, please see the Composable Logs
     (open source) framework
-    <b> <a href="https://pynb-dag-runner.github.io/pynb-dag-runner/">documentation site</a> </b>.
+    <b> <a href="https://composable-logs.github.io/composable-logs/">documentation site</a> </b>.
     </p>
 </div>;
 
@@ -21,5 +21,5 @@ export const SiteHeader = {
     // header left, top row: Page title/project name. Links to site root.
     title: "mnist-digits-demo-pipeline",
     // header right link: (linked from header "Github"-link)
-    gh_link: "https://github.com/pynb-dag-runner/mnist-digits-demo-pipeline",
+    gh_link: "https://github.com/composable-logs/mnist-digits-demo-pipeline",
 };

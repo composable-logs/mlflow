@@ -13,7 +13,7 @@ function getAttributeColumnLabels(addStaticSiteColumns, addNonStaticSiteColumns)
     DATE: 'Start Time',
     DURATION: 'Duration',
     USER: 'User',
-    RUN_NAME: 'Run Name',
+    RUN_NAME: 'Type',
     SOURCE: 'Source',
     VERSION: process.env.HOST_STATIC_SITE ? 'Commit' : 'Version',
   };
@@ -41,7 +41,7 @@ export const ATTRIBUTE_COLUMN_LABELS_FILTERED = (process.env.HOST_STATIC_SITE
 export const ATTRIBUTE_COLUMN_SORT_LABEL = {
   DATE: 'Start Time',
   USER: 'User',
-  RUN_NAME: 'Run Name',
+  RUN_NAME: 'Type',
   SOURCE: 'Source',
   VERSION: 'Version',
 };

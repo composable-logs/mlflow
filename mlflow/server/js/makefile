@@ -91,7 +91,7 @@ dev/serve-static-ui-in-watch-mode: | .clean-build-folder .npm-install
 	    npm start \
 	)
 
-dev/serve-static-ui-in-watch-mode[in-docker]:
+dev-in-docker/serve-static-ui-in-watch-mode:
 	( \
 	    cd docker; \
 	    make run[in-docker] \

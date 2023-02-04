@@ -13,7 +13,6 @@ import _ from 'lodash';
 import { ErrorCodes, SupportPageUrl } from '../constants';
 import { FormattedMessage } from 'react-intl';
 import { StaticMlflowService } from '../../experiment-tracking/static-data/StaticMlflowService'
-
 message.config({
   maxCount: 1,
   duration: 5,
@@ -379,7 +378,7 @@ class Utils {
     var desc;
 
     if (runEntry.type === 'workflow') {
-      desc = 'Workflow run';
+      desc = 'Workflow';
 
       var url;
       // eg. owner/repo-name
@@ -394,9 +393,9 @@ class Utils {
       return !url ? desc : <a target='_top' href={url}>{desc}</a>
 
     } else if (runEntry.type === 'task') {
-      if (runAttributes['task.task_type'] === 'jupytext') {
-        if (!!runAttributes['task.task_id']) {
-          desc = runAttributes['task.task_id'];
+      if ((runAttributes['task.type'] === 'jupytext') || (runAttributes['task.type'] === 'python')) {
+        if (!!runAttributes['task.id']) {
+          desc = runAttributes['task.id'];
         }
       } else {
         desc = 'NA';
@@ -517,6 +516,19 @@ class Utils {
       marginRight: '4px',
     };
 
+    if (process.env.HOST_STATIC_SITE) {
+      if (this.getRunName(tags) === "workflow") {
+        // horizontal bars with checkmarks on left side
+        return <img alt='Workflow Icon' title='Workflow' style={imageStyle} src={jobSvg} />;
+      } else if (this.getRunName(tags) === "python") {
+        // html page with <> symbol
+        return <img alt='Python task' title='Python task' style={imageStyle} src={notebookSvg} />;
+      } else if (this.getRunName(tags) === "jupytext") {
+        // html page with <> symbol
+        return <img alt='Jupytext task' title='Jupytext task' style={imageStyle} src={notebookSvg} />;
+      }
+    }
+
     const sourceType = this.getSourceType(tags);
     if (sourceType === 'NOTEBOOK') {
       if (Utils.getNotebookRevisionId(tags)) {
@@ -529,6 +541,7 @@ class Utils {
           />
         );
       } else {
+        // html page with <> symbol
         return <img alt='Notebook Icon' title='Notebook' style={imageStyle} src={notebookSvg} />;
       }
     } else if (sourceType === 'LOCAL') {
@@ -538,6 +551,7 @@ class Utils {
     } else if (sourceType === 'PROJECT') {
       return <img alt='Project Icon' title='Project' style={imageStyle} src={projectSvg} />;
     } else if (sourceType === 'JOB') {
+      // horizontal bars with checkmarks on left side
       return <img alt='Job Icon' title='Job' style={imageStyle} src={jobSvg} />;
     }
     return <img alt='No icon' style={imageStyle} src={emptySvg} />;

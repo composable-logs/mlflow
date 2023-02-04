@@ -395,8 +395,8 @@ class Utils {
 
     } else if (runEntry.type === 'task') {
       if (runAttributes['task.task_type'] === 'jupytext') {
-        if (!!runAttributes['task.notebook']) {
-          desc = runAttributes['task.notebook'];
+        if (!!runAttributes['task.task_id']) {
+          desc = runAttributes['task.task_id'];
         }
       } else {
         desc = 'NA';

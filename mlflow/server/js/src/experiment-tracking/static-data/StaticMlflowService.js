@@ -15,7 +15,7 @@ const reformatEntry = (runId, entry, experimentId) => {
   if (isPipeline) {
     sourceName = "Workflow run";
   } else {
-    sourceName = entry["attributes"]["task.task_id"] || "Unknown";
+    sourceName = entry["attributes"]["task.id"] || "Unknown";
   }
 
   const result = {
@@ -219,7 +219,7 @@ class StaticDataLoaderClass {
         .forEach((entry) => {
           const entryExperimentId = entry.task_id;
           if (!result2.has(entryExperimentId)) {
-            result2.set(entryExperimentId, entry["attributes"]["task.task_id"]);
+            result2.set(entryExperimentId, entry["attributes"]["task.id"]);
           }
         })
       );

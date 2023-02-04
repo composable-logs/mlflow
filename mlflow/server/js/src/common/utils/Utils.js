@@ -394,9 +394,9 @@ class Utils {
       return !url ? desc : <a target='_top' href={url}>{desc}</a>
 
     } else if (runEntry.type === 'task') {
-      if (runAttributes['task.task_type'] === 'jupytext') {
-        if (!!runAttributes['task.task_id']) {
-          desc = runAttributes['task.task_id'];
+      if (runAttributes['task.type'] === 'jupytext') {
+        if (!!runAttributes['task.id']) {
+          desc = runAttributes['task.id'];
         }
       } else {
         desc = 'NA';

@@ -11,11 +11,19 @@ const one = (xs) => {
 const reformatEntry = (runId, entry, experimentId) => {
   const isPipeline = entry.type === "workflow";
 
+  // For tasks, is this Python or Jupytext task?
+  // For workflow, "-"
+  var runName;
+
+  // task-id
   var sourceName;
+
   if (isPipeline) {
-    sourceName = "Workflow run";
+    sourceName = "";
+    runName = "workflow"
   } else {
     sourceName = entry["attributes"]["task.id"] || "Unknown";
+    runName = entry["attributes"]["task.type"] || "Unknown"
   }
 
   const result = {
@@ -51,7 +59,7 @@ const reformatEntry = (runId, entry, experimentId) => {
       },
       {
         key: "mlflow.runName",
-        value: entry.type, // "workflow", "task"
+        value: runName
       },
       // extra top keys are shown in main UI list of runs
       {

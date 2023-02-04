@@ -21,6 +21,7 @@ import { setTagApi, deleteTagApi } from '../actions';
 import { PageHeader, OverflowMenu } from '../../shared/building_blocks/PageHeader';
 import { DataBacklinkFooter } from '../static-data/UIConstants.js';
 import RemotelyFetchedMermaidView from '../../experiment-tracking/components/artifact-view-components/RemotelyFetchedMermaidView';
+import { capitalizeFirstChar } from '../../common/utils/StringUtils'
 
 export class RunViewImpl extends Component {
   static propTypes = {
@@ -260,6 +261,7 @@ export class RunViewImpl extends Component {
           >
             {startTime}
           </Descriptions.Item>
+          {/* --- task name + type */}
           <Descriptions.Item
             label={this.props.intl.formatMessage({
               defaultMessage: 'Source',
@@ -271,6 +273,17 @@ export class RunViewImpl extends Component {
               {Utils.renderSource(tags, queryParams, runUuid)}
             </div>
           </Descriptions.Item>
+          {tags['mlflow.runName'] !== undefined ? (
+            <Descriptions.Item
+              label={this.props.intl.formatMessage({
+                defaultMessage: 'Task type',
+                description: 'Specify if this is a Workflow (of multiple tasks), a Python task or a Jupytext notebook task',
+              })}
+              >
+                {capitalizeFirstChar(tags['mlflow.runName'].value)}
+            </Descriptions.Item>
+          ) : null}
+          {/* --- */}
           {Utils.getSourceVersion(tags) ? (
             <Descriptions.Item
               label={this.props.intl.formatMessage({

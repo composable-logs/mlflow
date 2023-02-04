@@ -24,6 +24,8 @@ import { ExperimentRunsTableEmptyOverlay } from '../../common/components/Experim
 import LocalStorageUtils from '../../common/utils/LocalStorageUtils';
 import { AgGridPersistedState } from '../sdk/MlflowLocalStorageMessages';
 import { TrimmedText } from '../../common/components/TrimmedText';
+import { capitalizeFirstChar } from '../../common/utils/StringUtils'
+
 import { getModelVersionPageRoute } from '../../model-registry/routes';
 import { css } from 'emotion';
 import { COLUMN_TYPES, ATTRIBUTE_COLUMN_LABELS, ATTRIBUTE_COLUMN_LABELS_FILTERED, ATTRIBUTE_COLUMN_SORT_KEY } from '../constants';
@@ -193,6 +195,7 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
           pinned: 'left',
           field: 'runName',
           sortable: true,
+          cellRenderer: (x) => capitalizeFirstChar(x.value),
           headerComponentParams: {
             ...commonSortOrderProps,
             canonicalSortKey: ATTRIBUTE_COLUMN_SORT_KEY.RUN_NAME,

@@ -24,9 +24,11 @@ import { ExperimentRunsTableEmptyOverlay } from '../../common/components/Experim
 import LocalStorageUtils from '../../common/utils/LocalStorageUtils';
 import { AgGridPersistedState } from '../sdk/MlflowLocalStorageMessages';
 import { TrimmedText } from '../../common/components/TrimmedText';
+import { capitalizeFirstChar } from '../../common/utils/StringUtils'
+
 import { getModelVersionPageRoute } from '../../model-registry/routes';
 import { css } from 'emotion';
-import { COLUMN_TYPES, ATTRIBUTE_COLUMN_LABELS, ATTRIBUTE_COLUMN_SORT_KEY } from '../constants';
+import { COLUMN_TYPES, ATTRIBUTE_COLUMN_LABELS, ATTRIBUTE_COLUMN_LABELS_FILTERED, ATTRIBUTE_COLUMN_SORT_KEY } from '../constants';
 
 const PARAM_PREFIX = '$$$param$$$';
 const METRIC_PREFIX = '$$$metric$$$';
@@ -193,12 +195,41 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
           pinned: 'left',
           field: 'runName',
           sortable: true,
+          cellRenderer: (x) => capitalizeFirstChar(x.value),
           headerComponentParams: {
             ...commonSortOrderProps,
             canonicalSortKey: ATTRIBUTE_COLUMN_SORT_KEY.RUN_NAME,
             computedStylesOnSortKey: headerStyle,
           },
           cellStyle,
+        },
+        {
+          headerName: ATTRIBUTE_COLUMN_LABELS.SOURCE,
+          field: 'source',
+          initialWidth: 150,
+          cellRenderer: 'sourceCellRenderer',
+          sortable: true,
+          headerComponentParams: {
+            ...commonSortOrderProps,
+            canonicalSortKey: ATTRIBUTE_COLUMN_SORT_KEY.SOURCE,
+            computedStylesOnSortKey: headerStyle,
+          },
+          cellStyle,
+        },
+        // From https://www.ag-grid.com/react-data-grid/scrolling-performance/
+        // Since mlflow uses "@ag-grid-community/react": "^25.0.0"
+        // there seems to be an advantage of avoiding React components
+        // for cell formatting.
+        {
+          headerName: ATTRIBUTE_COLUMN_LABELS.TRIGGER,
+          field: 'trigger',
+          cellRenderer: (x) => x.value,
+          initialWidth: 80,
+        },
+        {
+          headerName: ATTRIBUTE_COLUMN_LABELS.BRANCH,
+          field: 'branch',
+          initialWidth: 100,
         },
         {
           headerName: ATTRIBUTE_COLUMN_LABELS.USER,
@@ -212,20 +243,9 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
           cellStyle,
         },
         {
-          headerName: ATTRIBUTE_COLUMN_LABELS.SOURCE,
-          field: 'source',
-          cellRenderer: 'sourceCellRenderer',
-          sortable: true,
-          headerComponentParams: {
-            ...commonSortOrderProps,
-            canonicalSortKey: ATTRIBUTE_COLUMN_SORT_KEY.SOURCE,
-            computedStylesOnSortKey: headerStyle,
-          },
-          cellStyle,
-        },
-        {
           headerName: ATTRIBUTE_COLUMN_LABELS.VERSION,
           field: 'version',
+          initialWidth: 70,
           cellRenderer: 'versionCellRenderer',
           sortable: true,
           headerComponentParams: {
@@ -241,7 +261,9 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
           cellRenderer: 'modelsCellRenderer',
           initialWidth: 200,
         },
-      ].filter((c) => !categorizedUncheckedKeys[COLUMN_TYPES.ATTRIBUTES].includes(c.headerName)),
+      ].filter((c) => !categorizedUncheckedKeys[COLUMN_TYPES.ATTRIBUTES].includes(c.headerName))
+      // note: checkbox column would disappear without "|| !c.headerName" since it has no headerName
+      .filter((c) => Object.values(ATTRIBUTE_COLUMN_LABELS_FILTERED).includes(c.headerName) || !c.headerName),
       {
         headerName: 'Metrics',
         children: metricKeyList.map((metricKey, i) => {
@@ -356,6 +378,8 @@ export class ExperimentRunsTableMultiColumnView2 extends React.Component {
         tags,
         queryParams,
         modelVersionsByRunUuid,
+        trigger: Utils.renderTrigger(runInfo.run_uuid) || '-',
+        branch: Utils.getBranch(runInfo.run_uuid) || '-',
         isParent,
         hasExpander,
         expanderOpen,
@@ -599,6 +623,12 @@ function DateCellRenderer(props) {
     childrenIds,
     onExpand,
   } = props.data;
+
+  // Despite name, this renders first column in list view of ML Flow
+  //   - checkmark to expand child runs
+  //   - was run successful
+  //   - time since run
+
   return (
     <div>
       {hasExpander ? (
@@ -630,8 +660,8 @@ function DateCellRenderer(props) {
 DateCellRenderer.propTypes = { data: PropTypes.object };
 
 function SourceCellRenderer(props) {
-  const { tags, queryParams } = props.data;
-  const sourceType = Utils.renderSource(tags, queryParams);
+  const { tags, queryParams, runInfo } = props.data;
+  const sourceType = Utils.renderSource(tags, queryParams, runInfo.run_uuid);
   return sourceType ? (
     <React.Fragment>
       {Utils.renderSourceTypeIcon(tags)}
@@ -646,7 +676,7 @@ SourceCellRenderer.propTypes = { data: PropTypes.object };
 
 function VersionCellRenderer(props) {
   const { tags } = props.data;
-  return Utils.renderVersion(tags) || EMPTY_CELL_PLACEHOLDER;
+  return Utils.renderVersion(tags, true, props.data.runInfo.run_uuid) || EMPTY_CELL_PLACEHOLDER;
 }
 
 export function ModelsCellRenderer(props) {

@@ -63,6 +63,7 @@ import {
   COLUMN_SORT_BY_DESC,
   SORT_DELIMITER_SYMBOL,
 } from '../constants';
+import { DataBacklinkFooter } from '../static-data/UIConstants.js'
 
 export const DEFAULT_EXPANDED_VALUE = false;
 const { Option } = Select;
@@ -99,7 +100,8 @@ export class ExperimentView extends Component {
       showNotesEditor: false,
       showNotes: true,
       showFilters: false,
-      showOnboardingHelper: onboardingInformationStore.getItem('showTrackingHelper') === null,
+      showOnboardingHelper: !process.env.HOST_STATIC_SITE &&
+        (onboardingInformationStore.getItem('showTrackingHelper') === null),
       searchInput: props.searchInput,
       lastExperimentId: undefined,
     };
@@ -654,13 +656,13 @@ export class ExperimentView extends Component {
                     style={{ backgroundColor: '#33804D' }}
                     overflowCount={MAX_DETECT_NEW_RUNS_RESULTS - 1}
                   >
-                    <Button className='refresh-button' onClick={this.initiateSearch}>
+                  {process.env.HOST_STATIC_SITE ? null : <Button className='refresh-button' onClick={this.initiateSearch}>
                       <img alt='' title='Refresh runs' src={syncSvg} height={24} width={24} />
                       <FormattedMessage
                         defaultMessage='Refresh'
                         description='refresh button text to refresh the experiment runs'
                       />
-                    </Button>
+                    </Button>}
                   </Badge>
                   <Button
                     className='compare-button'
@@ -673,7 +675,7 @@ export class ExperimentView extends Component {
                       description='String for the compare button to compare experiment runs to find an ideal model'
                     />
                   </Button>
-                  {this.props.lifecycleFilter === LIFECYCLE_FILTER.ACTIVE ? (
+                  {!process.env.HOST_STATIC_SITE && (this.props.lifecycleFilter === LIFECYCLE_FILTER.ACTIVE) ? (
                     <Button
                       className='delete-restore-button'
                       disabled={Object.keys(this.state.runsSelected).length < 1}
@@ -1018,6 +1020,7 @@ export class ExperimentView extends Component {
               />
             )}
           </Spacer>
+          {DataBacklinkFooter}
         </div>
       </div>
     );

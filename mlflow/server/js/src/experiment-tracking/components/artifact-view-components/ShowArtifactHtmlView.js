@@ -14,6 +14,7 @@ class ShowArtifactHtmlView extends Component {
   static propTypes = {
     runUuid: PropTypes.string.isRequired,
     path: PropTypes.string.isRequired,
+    artifactRootUri: PropTypes.string.isRequired,
     getArtifact: PropTypes.func,
   };
 
@@ -54,9 +55,8 @@ class ShowArtifactHtmlView extends Component {
           url=''
           src={this.getBlobURL(this.state.html, 'text/html')}
           width='100%'
-          height='500px'
           id='html'
-          className='html-iframe'
+          className='artifact-html-iframe'
           display='block'
           position='relative'
           sandbox='allow-scripts'
@@ -72,7 +72,7 @@ class ShowArtifactHtmlView extends Component {
 
   /** Fetches artifacts and updates component state with the result */
   fetchArtifacts() {
-    const artifactLocation = getSrc(this.props.path, this.props.runUuid);
+    const artifactLocation = getSrc(this.props.path, this.props.runUuid, this.props.artifactRootUri);
     this.props
       .getArtifact(artifactLocation)
       .then((html) => {

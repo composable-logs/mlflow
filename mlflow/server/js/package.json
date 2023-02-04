@@ -29,6 +29,7 @@
     "json-bigint": "databricks/json-bigint#a1defaf9cd8dd749f0fd4d5f83a22cd846789658",
     "leaflet": "^1.5.1",
     "lodash": "^4.17.21",
+    "mermaid": "8.10.2",
     "moment": "^2.24.0",
     "plotly.js": "1.50.0",
     "prop-types": "^15.7.2",
@@ -45,6 +46,7 @@
     "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0",
     "react-scripts": "2.1.8",
+    "react-spinners": "0.13.4",
     "react-syntax-highlighter": "^12.2.1",
     "react-transition-group": "^4.4.1",
     "react-treebeard": "2.1.0",
@@ -89,7 +91,7 @@
     "//": "IMPORTANT: For compatibility with Windows in MLflow OSS, do NOT inline environment variables in scripts other than `start-web`. Environment variables can instead be set in `mlflow/server/js/scripts/global-setup.js`.",
     "start": "react-app-rewired start",
     "start-web": "SERVE_WEBAPP=true HIDE_HEADER=true HIDE_EXPERIMENT_LIST=true SHOW_GDPR_PURGING_MESSAGES=true USE_ABSOLUTE_AJAX_URLS=true SHOULD_REDIRECT_IFRAME=true PORT=3001 react-app-rewired start",
-    "build": "react-app-rewired --max_old_space_size=8192 build",
+    "build": "GENERATE_SOURCEMAP=false react-app-rewired --max_old_space_size=8192 build",
     "test": "eslint src && react-app-rewired test --env=jsdom --colors",
     "test:debug": "eslint src && react-app-rewired --inspect-brk test --runInBand --no-cache --env=jsdom",
     "eject": "react-scripts eject",
@@ -98,7 +100,7 @@
     "extract-i18n:base": "node scripts/extract-i18n.js",
     "extract-i18n": "npm run extract-i18n:base"
   },
-  "homepage": "static-files",
+  "homepage": ".",
   "jest": {
     "collectCoverageFrom": [
       "src/**/*.{js,jsx}",

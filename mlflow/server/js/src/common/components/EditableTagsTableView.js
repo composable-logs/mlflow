@@ -85,53 +85,55 @@ export class EditableTagsTableViewImpl extends Component {
           onSaveEdit={handleSaveEdit}
           onDelete={handleDeleteTag}
         />
-        <div style={styles.addTagForm.wrapper}>
-          <Form ref={innerRef} layout='inline' onFinish={handleAddTag}>
-            <Form.Item
-              name='name'
-              rules={[
-                {
-                  required: true,
-                  message: this.props.intl.formatMessage({
-                    defaultMessage: 'Name is required.',
+        {process.env.HOST_STATIC_SITE ? null :
+          (<div style={styles.addTagForm.wrapper}>
+            <Form ref={innerRef} layout='inline' onFinish={handleAddTag}>
+              <Form.Item
+                name='name'
+                rules={[
+                  {
+                    required: true,
+                    message: this.props.intl.formatMessage({
+                      defaultMessage: 'Name is required.',
+                      description:
+                        'Error message for name requirement in editable tags table view in MLflow',
+                    }),
+                    validator: this.tagNameValidator,
+                  },
+                ]}
+              >
+                <Input
+                  aria-label='tag name'
+                  placeholder={this.props.intl.formatMessage({
+                    defaultMessage: 'Name',
                     description:
-                      'Error message for name requirement in editable tags table view in MLflow',
-                  }),
-                  validator: this.tagNameValidator,
-                },
-              ]}
-            >
-              <Input
-                aria-label='tag name'
-                placeholder={this.props.intl.formatMessage({
-                  defaultMessage: 'Name',
-                  description:
-                    'Default text for name placeholder in editable tags table form in MLflow',
-                })}
-                style={styles.addTagForm.nameInput}
-              />
-            </Form.Item>
-            <Form.Item name='value' rules={[]}>
-              <Input
-                aria-label='tag value'
-                placeholder={this.props.intl.formatMessage({
-                  defaultMessage: 'Value',
-                  description:
-                    'Default text for value placeholder in editable tags table form in MLflow',
-                })}
-                style={styles.addTagForm.valueInput}
-              />
-            </Form.Item>
-            <Form.Item>
-              <Button loading={isRequestPending} htmlType='submit' data-test-id='add-tag-button'>
-                <FormattedMessage
-                  defaultMessage='Add'
-                  description='Add button text in editable tags table view in MLflow'
+                      'Default text for name placeholder in editable tags table form in MLflow',
+                  })}
+                  style={styles.addTagForm.nameInput}
                 />
-              </Button>
-            </Form.Item>
-          </Form>
-        </div>
+              </Form.Item>
+              <Form.Item name='value' rules={[]}>
+                <Input
+                  aria-label='tag value'
+                  placeholder={this.props.intl.formatMessage({
+                    defaultMessage: 'Value',
+                    description:
+                      'Default text for value placeholder in editable tags table form in MLflow',
+                  })}
+                  style={styles.addTagForm.valueInput}
+                />
+              </Form.Item>
+              <Form.Item>
+                <Button loading={isRequestPending} htmlType='submit' data-test-id='add-tag-button'>
+                  <FormattedMessage
+                    defaultMessage='Add'
+                    description='Add button text in editable tags table view in MLflow'
+                  />
+                </Button>
+              </Form.Item>
+            </Form>
+          </div>)
+        }
       </Spacer>
     );
   }

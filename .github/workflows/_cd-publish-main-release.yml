@@ -1,0 +1,27 @@
+name: "cd: Publish main release to pypi"
+
+on:
+  workflow_call:
+    secrets:
+      PYPI_SECRET_API_TOKEN:
+        required: true
+
+jobs:
+  cd-upload-package-to-pypi:
+    runs-on: ubuntu-20.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Download wheel file built in previously step
+        uses: actions/download-artifact@v3
+        with:
+          path: dist
+          name: webui-py-package-wheel-file
+
+      - name: Publish package
+        # commit sha below points to tag v1.5.1, see
+        # https://github.com/pypa/gh-action-pypi-publish
+        uses: pypa/gh-action-pypi-publish@37f50c210e3d2f9450da2cd423303d6a14a6e29f
+        with:
+          packages_dir: dist
+          password: ${{ secrets.PYPI_SECRET_API_TOKEN }}

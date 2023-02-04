@@ -41,6 +41,7 @@ function rewiredOverrides(config, env) {
   config = rewireDefinePlugin(config, env, {
     'process.env': {
       HIDE_HEADER: process.env.HIDE_HEADER ? JSON.stringify('true') : JSON.stringify('false'),
+      HOST_STATIC_SITE: process.env.HOST_STATIC_SITE === "true",
       HIDE_EXPERIMENT_LIST: process.env.HIDE_EXPERIMENT_LIST
         ? JSON.stringify('true')
         : JSON.stringify('false'),

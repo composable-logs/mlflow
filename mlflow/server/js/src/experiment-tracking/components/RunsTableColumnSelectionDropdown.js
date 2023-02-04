@@ -6,7 +6,7 @@ import { Button } from '../../shared/building_blocks/Button';
 import { SearchTree } from '../../common/components/SearchTree';
 import PropTypes from 'prop-types';
 import _ from 'lodash';
-import { COLUMN_TYPES, ATTRIBUTE_COLUMN_LABELS } from '../constants';
+import { COLUMN_TYPES, ATTRIBUTE_COLUMN_LABELS_FILTERED } from '../constants';
 
 import { FormattedMessage } from 'react-intl';
 
@@ -41,7 +41,7 @@ export class RunsTableColumnSelectionDropdown extends React.Component {
 
     // Attributes
     const data = [
-      ...Object.values(ATTRIBUTE_COLUMN_LABELS).map((text) => ({
+      ...Object.values(ATTRIBUTE_COLUMN_LABELS_FILTERED).map((text) => ({
         key: `${COLUMN_TYPES.ATTRIBUTES}-${text}`,
         title: text,
       })),
@@ -87,7 +87,7 @@ export class RunsTableColumnSelectionDropdown extends React.Component {
     const { paramKeyList, metricKeyList, visibleTagKeyList, categorizedUncheckedKeys } = this.props;
     return [
       ..._.difference(
-        Object.values(ATTRIBUTE_COLUMN_LABELS),
+        Object.values(ATTRIBUTE_COLUMN_LABELS_FILTERED),
         categorizedUncheckedKeys[COLUMN_TYPES.ATTRIBUTES],
       ).map((key) => `${COLUMN_TYPES.ATTRIBUTES}-${key}`),
       ..._.difference(paramKeyList, categorizedUncheckedKeys[COLUMN_TYPES.PARAMS]).map(

@@ -7,20 +7,41 @@ export const COLUMN_TYPES = {
 export const MLMODEL_FILE_NAME = 'MLmodel';
 export const ONE_MB = 1024 * 1024;
 
-export const ATTRIBUTE_COLUMN_LABELS = {
-  DATE: 'Start Time',
-  DURATION: 'Duration',
-  USER: 'User',
-  RUN_NAME: 'Run Name',
-  SOURCE: 'Source',
-  VERSION: 'Version',
-  MODELS: 'Models',
-};
+
+function getAttributeColumnLabels(addStaticSiteColumns, addNonStaticSiteColumns) {
+  let result = {
+    DATE: 'Start Time',
+    DURATION: 'Duration',
+    USER: 'User',
+    RUN_NAME: 'Type',
+    SOURCE: 'Source',
+    VERSION: process.env.HOST_STATIC_SITE ? 'Commit' : 'Version',
+  };
+  if (addStaticSiteColumns) {
+    result['TRIGGER'] = 'Trigger';
+    result['BRANCH'] = 'Branch';
+  }
+  if (addNonStaticSiteColumns) {
+      result['MODELS'] = 'Models';
+  }
+  return result;
+}
+
+// all attribute columns
+export const ATTRIBUTE_COLUMN_LABELS = getAttributeColumnLabels(true, true);
+
+// filtered attribute columns:
+//  - include MODELS to nonstatic sites
+//  - include TRIGGER+BRANCH to static sites
+export const ATTRIBUTE_COLUMN_LABELS_FILTERED = (process.env.HOST_STATIC_SITE
+  ? getAttributeColumnLabels(true, false)
+  : getAttributeColumnLabels(false, true)
+);
 
 export const ATTRIBUTE_COLUMN_SORT_LABEL = {
   DATE: 'Start Time',
   USER: 'User',
-  RUN_NAME: 'Run Name',
+  RUN_NAME: 'Type',
   SOURCE: 'Source',
   VERSION: 'Version',
 };

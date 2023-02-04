@@ -24,9 +24,8 @@ button:hover, .btn:hover {
 }
 
 .App-header {
-  background-color: #082142;
-  height: 60px;
-  color: white;
+  background-color: #eee;
+  height: 40px;
   display: block;
   margin-bottom: 24px;
 }
@@ -58,7 +57,8 @@ div.github {
 }
 
 div.docs {
-  color: #ffffff;
+  margin-top: -12px;
+  color: #555;
 }
 
 .header-nav-link {
@@ -91,6 +91,15 @@ div.header-route-links {
   padding-top: 20px;
   margin-left: 40px;
   font-size: 16px;
+}
+
+div.site-name-link {
+  position: relative;
+  margin-left: -14px;
+  margin-top: -14px;
+  font-size: 18px;
+  color: #555;
+  font-weight: 500;
 }
 
 h1 {
@@ -195,4 +204,20 @@ img.center {
 pre {
   border: 1px solid #ccc;
   border-radius: 4px;
+}
+
+/*** Loading screen ***/
+
+.loading-container {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 400px;
+}
+
+.loading-container h1 {
+  color: #888;
+  text-align: center;
+  margin-top: 40px;
 }

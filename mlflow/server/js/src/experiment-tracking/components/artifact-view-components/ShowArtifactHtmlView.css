@@ -1,3 +1,6 @@
-.html-iframe {
+.artifact-html-iframe {
   border: none;
+
+  /* 56px is total height of artifact details above artifact (w. name and size) */
+  height: calc(100% - 56px);
 }

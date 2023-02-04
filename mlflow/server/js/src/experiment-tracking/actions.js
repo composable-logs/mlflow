@@ -1,23 +1,33 @@
 import { MlflowService } from './sdk/MlflowService';
+import { StaticMlflowService } from './static-data/StaticMlflowService';
 import { getUUID, wrapDeferred } from '../common/utils/ActionUtils';
 import { ErrorCodes } from '../common/constants';
 
 export const SEARCH_MAX_RESULTS = 100;
 
+export const getApiData = (methodName, arg) => {
+  return (process.env.HOST_STATIC_SITE
+    ? StaticMlflowService[methodName](arg)
+    : wrapDeferred(MlflowService[methodName], arg)
+  );
+};
+
+// ****** Supported also for static data UI ******
 export const LIST_EXPERIMENTS_API = 'LIST_EXPERIMENTS_API';
 export const listExperimentsApi = (id = getUUID()) => {
   return {
     type: LIST_EXPERIMENTS_API,
-    payload: wrapDeferred(MlflowService.listExperiments, {}),
+    payload: getApiData("listExperiments", {}),
     meta: { id: id },
   };
 };
 
+// ****** Supported also for static data UI ******
 export const GET_EXPERIMENT_API = 'GET_EXPERIMENT_API';
 export const getExperimentApi = (experimentId, id = getUUID()) => {
   return {
     type: GET_EXPERIMENT_API,
-    payload: wrapDeferred(MlflowService.getExperiment, { experiment_id: experimentId }),
+    payload: getApiData("getExperiment", { experiment_id: experimentId }),
     meta: { id: id },
   };
 };
@@ -64,11 +74,12 @@ export const updateExperimentApi = (experimentId, newExperimentName, id = getUUI
   };
 };
 
+// ****** Supported also for static data UI ******
 export const GET_RUN_API = 'GET_RUN_API';
 export const getRunApi = (runId, id = getUUID()) => {
   return {
     type: GET_RUN_API,
-    payload: wrapDeferred(MlflowService.getRun, { run_id: runId }),
+    payload: getApiData("getRun", { run_id: runId }),
     meta: { id: id },
   };
 };
@@ -118,8 +129,14 @@ export const getParentRunIdsToFetch = (runs) => {
 };
 
 // this function takes a response of runs and returns them along with their missing parents
-export const fetchMissingParents = (searchRunsResponse) =>
-  searchRunsResponse.runs && searchRunsResponse.runs.length
+export const fetchMissingParents = (searchRunsResponse) => {
+    if (process.env.HOST_STATIC_SITE) {
+      // return input as-is for static site; In this case, the search API should ensure there
+      // are no missing parents
+      return searchRunsResponse;
+    }
+
+    return searchRunsResponse.runs && searchRunsResponse.runs.length
     ? Promise.all(
         getParentRunIdsToFetch(searchRunsResponse.runs).map((runId) =>
           wrapDeferred(MlflowService.getRun, { run_id: runId })
@@ -140,6 +157,7 @@ export const fetchMissingParents = (searchRunsResponse) =>
         return searchRunsResponse;
       })
     : searchRunsResponse;
+};
 
 export const searchRunsPayload = ({
   experimentIds,
@@ -149,15 +167,18 @@ export const searchRunsPayload = ({
   orderBy,
   pageToken,
   shouldFetchParents,
-}) =>
-  wrapDeferred(MlflowService.searchRuns, {
+}) => {
+  const args = {
     experiment_ids: experimentIds,
     filter: filter,
     run_view_type: runViewType,
     max_results: maxResults || SEARCH_MAX_RESULTS,
     order_by: orderBy,
     page_token: pageToken,
-  }).then((res) => (shouldFetchParents ? fetchMissingParents(res) : res));
+  };
+
+  return getApiData("searchRuns", args).then((res) => (shouldFetchParents ? fetchMissingParents(res) : res));
+};
 
 export const SEARCH_RUNS_API = 'SEARCH_RUNS_API';
 export const searchRunsApi = (params) => ({
@@ -173,12 +194,14 @@ export const loadMoreRunsApi = (params) => ({
   meta: { id: params.id || getUUID() },
 });
 
+// ****** Supported also for static data UI ******
 // TODO: run_uuid is deprecated, use run_id instead
 export const LIST_ARTIFACTS_API = 'LIST_ARTIFACTS_API';
 export const listArtifactsApi = (runUuid, path, id = getUUID()) => {
   return {
     type: LIST_ARTIFACTS_API,
-    payload: wrapDeferred(MlflowService.listArtifacts, {
+    payload:
+    getApiData("listArtifacts", {
       run_uuid: runUuid,
       path: path,
     }),

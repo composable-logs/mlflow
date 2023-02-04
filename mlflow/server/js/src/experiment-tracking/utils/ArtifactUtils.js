@@ -26,9 +26,10 @@ export class ArtifactNode {
       this.children = {};
       this.isLoaded = true;
       fileInfos.forEach((fileInfo) => {
-        // basename is the last part of the path for this fileInfo.
+        // basename is the last part of the path for this fileInfo (except when
+        // HOST_STATIC_SITE=true; then all paths are expanded). See also, below.
         const pathParts = fileInfo.path.split('/');
-        const basename = pathParts[pathParts.length - 1];
+        const basename = process.env.HOST_STATIC_SITE ? fileInfo.path : pathParts[pathParts.length - 1];
         let children;
         if (fileInfo.is_dir) {
           children = [];
@@ -41,6 +42,9 @@ export class ArtifactNode {
   }
 
   static findChild(node, path) {
+    if (process.env.HOST_STATIC_SITE) {
+      return node.children[path];
+    }
     const parts = path.split('/');
     let ret = node;
     parts.forEach((part) => {

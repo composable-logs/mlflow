@@ -157,9 +157,15 @@ export const searchModelVersionsApi = (filterObj, id = getUUID()) => {
     })
     .join('&');
 
+  // always return no models in static setting
+  const queryResult = (process.env.HOST_STATIC_SITE
+    ? new Promise((resolve, reject) => resolve(({})))
+    : wrapDeferred(Services.searchModelVersions, { filter })
+  );
+
   return {
     type: SEARCH_MODEL_VERSIONS,
-    payload: wrapDeferred(Services.searchModelVersions, { filter }),
+    payload: queryResult,
     meta: { id },
   };
 };

@@ -19,6 +19,7 @@ export class ExperimentListView extends Component {
     onClickListExperiments: PropTypes.func.isRequired,
     // If activeExperimentId is undefined, then the active experiment is the first one.
     activeExperimentId: PropTypes.string,
+    activeReportId: PropTypes.string,
     experiments: PropTypes.arrayOf(Experiment).isRequired,
   };
 
@@ -109,6 +110,24 @@ export class ExperimentListView extends Component {
     const experimentListHeight = height - 60 - 100;
     // get searchInput from state
     const { searchInput } = this.state;
+
+    const reportsAndDashboardEntries = (() => {
+      const active = this.props.activeReportId === "about";
+      const className = `experiment-list-item ${
+        active ? 'active-experiment-list-item' : ''
+      }`;
+
+      return <div className={`header-container ${className}`}>
+      <Link
+        style={{ textDecoration: 'none', color: 'unset', width: '80%' }}
+        to="/report/about"
+        onClick={active ? (ev) => ev.preventDefault() : (ev) => ev}
+      >
+      <div style={{ overflow: 'hidden' }}>About</div>
+    </Link>
+    </div>
+    })();
+
     return (
       <div className='experiment-list-outer-container'>
         <CreateExperimentModal
@@ -128,30 +147,41 @@ export class ExperimentListView extends Component {
           experimentId={this.state.selectedExperimentId}
           experimentName={this.state.selectedExperimentName}
         />
-        <div>
-          <h1 className='experiments-header'>Experiments</h1>
-          <div className='experiment-list-create-btn-container'>
-            <i
-              onClick={this.handleCreateExperiment}
-              title='New Experiment'
-              className='fas fa-plus fa-border experiment-list-create-btn'
-            />
-          </div>
-          <div className='collapser-container'>
-            <i
-              onClick={this.props.onClickListExperiments}
-              title='Hide experiment list'
-              className='collapser fa fa-chevron-left login-icon'
-            />
-          </div>
-          <Input
-            className='experiment-list-search-input'
-            type='text'
-            placeholder='Search Experiments'
-            aria-label='search experiments'
-            value={searchInput}
-            onChange={this.handleSearchInputChange}
+        <div className='collapser-container'>
+          <i
+            onClick={this.props.onClickListExperiments}
+            title='Hide experiment list'
+            className='collapser fa fa-chevron-left login-icon'
           />
+        </div>
+
+        <div>
+          { /* Reports/dashbord list */ }
+          <h1 className='experiments-header'>Reports and dashboards</h1>
+          <div className='experiment-list-container' style={{ height: "50px" }}>
+              {reportsAndDashboardEntries}
+          </div>
+          { /* Experiments list */ }
+          <h1 className='experiments-header'>Experiments</h1>
+          {process.env.HOST_STATIC_SITE ? null :
+            <div className='experiment-list-create-btn-container'>
+              <i
+                onClick={this.handleCreateExperiment}
+                title='New Experiment'
+                className='fas fa-plus fa-border experiment-list-create-btn'
+              />
+            </div>
+          }
+          {process.env.HOST_STATIC_SITE ? null :
+            <Input
+              className='experiment-list-search-input'
+              type='text'
+              placeholder='Search Experiments'
+              aria-label='search experiments'
+              value={searchInput}
+              onChange={this.handleSearchInputChange}
+            />
+          }
           <div className='experiment-list-container' style={{ height: experimentListHeight }}>
             {this.props.experiments
               // filter experiments based on searchInput
@@ -177,23 +207,27 @@ export class ExperimentListView extends Component {
                       to={Routes.getExperimentPageRoute(experiment_id)}
                       onClick={active ? (ev) => ev.preventDefault() : (ev) => ev}
                     >
-                      <div style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}>{name}</div>
+                      <div style={{ overflow: 'hidden' }}>{name}</div>
                     </Link>
                     {/* Edit/Rename Experiment Option */}
-                    <IconButton
-                      icon={<EditOutlined />}
-                      onClick={this.handleRenameExperiment}
-                      data-experimentid={experiment_id}
-                      data-experimentname={name}
-                      style={{ marginRight: 10 }}
-                    />
+                    {process.env.HOST_STATIC_SITE ? null :
+                      <IconButton
+                        icon={<EditOutlined />}
+                        onClick={this.handleRenameExperiment}
+                        data-experimentid={experiment_id}
+                        data-experimentname={name}
+                        style={{ marginRight: 10 }}
+                      />
+                    }
                     {/* Delete Experiment option */}
-                    <IconButton
-                      icon={<i className='far fa-trash-alt' />}
-                      onClick={this.handleDeleteExperiment}
-                      data-experimentid={experiment_id}
-                      data-experimentname={name}
-                    />
+                    {process.env.HOST_STATIC_SITE ? null :
+                      <IconButton
+                        icon={<i className='far fa-trash-alt' />}
+                        onClick={this.handleDeleteExperiment}
+                        data-experimentid={experiment_id}
+                        data-experimentname={name}
+                      />
+                    }
                   </div>
                 );
               })}

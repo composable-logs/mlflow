@@ -11,6 +11,7 @@ export class HomePageImpl extends Component {
   static propTypes = {
     dispatchListExperimentsApi: PropTypes.func.isRequired,
     experimentId: PropTypes.string,
+    reportId: PropTypes.string,
   };
 
   state = {
@@ -24,7 +25,7 @@ export class HomePageImpl extends Component {
   }
 
   render() {
-    const homeView = <HomeView experimentId={this.props.experimentId} />;
+    const homeView = <HomeView experimentId={this.props.experimentId} reportId={this.props.reportId} />;
     return process.env.HIDE_EXPERIMENT_LIST === 'true' ? (
       homeView
     ) : (
@@ -39,8 +40,13 @@ const mapStateToProps = (state, ownProps) => {
   const { match } = ownProps;
   if (match.url === '/') {
     return {};
+  } else if (!!match.params.reportId) {
+    return {reportId : match.params.reportId};
+  } else if (!!match.params.experimentId) {
+    return { experimentId: match.params.experimentId };
+  } else {
+    return {};
   }
-  return { experimentId: match.params.experimentId };
 };
 
 const mapDispatchToProps = (dispatch) => {

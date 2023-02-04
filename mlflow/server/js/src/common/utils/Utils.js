@@ -12,7 +12,7 @@ import { message } from 'antd';
 import _ from 'lodash';
 import { ErrorCodes, SupportPageUrl } from '../constants';
 import { FormattedMessage } from 'react-intl';
-
+import { StaticMlflowService } from '../../experiment-tracking/static-data/StaticMlflowService'
 message.config({
   maxCount: 1,
   duration: 5,
@@ -371,6 +371,42 @@ class Utils {
     return tags && tags[revisionIdTag] && tags[revisionIdTag].value;
   }
 
+  static renderSourceStaticGH(runUuid) {
+    const runEntry = StaticMlflowService.getRunRawData(runUuid);
+    const runAttributes = runEntry.attributes;
+
+    var desc;
+
+    if (runEntry.type === 'workflow') {
+      desc = 'Workflow';
+
+      var url;
+      // eg. owner/repo-name
+      const ghRepoName = runAttributes['workflow.github.repository'];
+      // eg. 1234567890
+      const ghRunId = runAttributes['workflow.github.run_id'];
+
+      if (!!ghRepoName && !!ghRunId) {
+        url = `https://github.com/${ghRepoName}/actions/runs/${ghRunId}`;
+        desc += " (gha)";
+      }
+      return !url ? desc : <a target='_top' href={url}>{desc}</a>
+
+    } else if (runEntry.type === 'task') {
+      if ((runAttributes['task.type'] === 'jupytext') || (runAttributes['task.type'] === 'python')) {
+        if (!!runAttributes['task.id']) {
+          desc = runAttributes['task.id'];
+        }
+      } else {
+        desc = 'NA';
+      }
+
+      return desc;
+    } else {
+      return `Unknown: ${runEntry.type}`;
+    }
+  }
+
   /**
    * Renders the source name and entry point into an HTML element. Used for display.
    * @param tags Object containing tag key value pairs.
@@ -378,6 +414,10 @@ class Utils {
    * @param runUuid ID of the MLflow run to add to certain source (revision) links.
    */
   static renderSource(tags, queryParams, runUuid) {
+    if (process.env.HOST_STATIC_SITE) {
+      return Utils.renderSourceStaticGH(runUuid);
+    }
+
     const sourceName = Utils.getSourceName(tags);
     const sourceType = Utils.getSourceType(tags);
     let res = Utils.formatSource(tags);
@@ -476,6 +516,19 @@ class Utils {
       marginRight: '4px',
     };
 
+    if (process.env.HOST_STATIC_SITE) {
+      if (this.getRunName(tags) === "workflow") {
+        // horizontal bars with checkmarks on left side
+        return <img alt='Workflow Icon' title='Workflow' style={imageStyle} src={jobSvg} />;
+      } else if (this.getRunName(tags) === "python") {
+        // html page with <> symbol
+        return <img alt='Python task' title='Python task' style={imageStyle} src={notebookSvg} />;
+      } else if (this.getRunName(tags) === "jupytext") {
+        // html page with <> symbol
+        return <img alt='Jupytext task' title='Jupytext task' style={imageStyle} src={notebookSvg} />;
+      }
+    }
+
     const sourceType = this.getSourceType(tags);
     if (sourceType === 'NOTEBOOK') {
       if (Utils.getNotebookRevisionId(tags)) {
@@ -488,6 +541,7 @@ class Utils {
           />
         );
       } else {
+        // html page with <> symbol
         return <img alt='Notebook Icon' title='Notebook' style={imageStyle} src={notebookSvg} />;
       }
     } else if (sourceType === 'LOCAL') {
@@ -497,6 +551,7 @@ class Utils {
     } else if (sourceType === 'PROJECT') {
       return <img alt='Project Icon' title='Project' style={imageStyle} src={projectSvg} />;
     } else if (sourceType === 'JOB') {
+      // horizontal bars with checkmarks on left side
       return <img alt='Job Icon' title='Job' style={imageStyle} src={jobSvg} />;
     }
     return <img alt='No icon' style={imageStyle} src={emptySvg} />;
@@ -595,16 +650,91 @@ class Utils {
     return '';
   }
 
-  // TODO(aaron) Remove runInfo when user_id deprecation is complete.
-  static getUser(runInfo, runTags) {
-    const userTag = runTags[Utils.userTag];
-    if (userTag) {
-      return userTag.value;
+  static renderTrigger(runUuid) {
+    if (process.env.HOST_STATIC_SITE) {
+      const attributes = StaticMlflowService.getRunRawData(runUuid).attributes;
+      const ghEventName = attributes['workflow.github.event_name'];
+
+      if (ghEventName === 'pull_request') {
+        const githubRepo = attributes['workflow.github.repository'];
+        const prRef = attributes['workflow.github.ref_name'];  // eg. 42/ref
+        const url = `https://github.com/${githubRepo}/pull/${prRef}`;
+
+        // see https://stackoverflow.com/a/1862219
+        const desc = 'PR' + prRef.replace(/\D/g, '');
+
+        // hover text branch -> target branch
+        const ghBaseRef = attributes['workflow.github.base_ref'];
+        const ghHeadRef = attributes['workflow.github.head_ref'];
+        const hoverText = `${ghHeadRef} → ${ghBaseRef}`;
+
+        return `<a href=${url} target='_blank' title='${hoverText}'>${desc}</a>`;
+      } else if (ghEventName === 'schedule') {
+        return 'Schedule';
+      } else if (ghEventName === 'push') {
+        return 'Push';
+      } else {
+        return ghEventName;
+      }
     }
-    return runInfo.user_id;
   }
 
-  static renderVersion(tags, shortVersion = true) {
+  static getBranch(runUuid) {
+    if (process.env.HOST_STATIC_SITE) {
+      const attributes = StaticMlflowService.getRunRawData(runUuid).attributes;
+      const ghEventName = attributes['workflow.github.event_name'];
+
+      if (ghEventName === 'pull_request') {
+        return attributes['workflow.github.head_ref'];
+      } else {
+        return attributes['workflow.github.ref_name'];
+      }
+    }
+  }
+
+  // TODO(aaron) Remove runInfo when user_id deprecation is complete.
+  static getUser(runInfo, runTags) {
+    if (process.env.HOST_STATIC_SITE) {
+      try {
+        const attributes = StaticMlflowService.getRunRawData(runInfo.run_uuid).attributes;
+        const ghEventName = attributes['workflow.github.event_name'];
+
+        if (ghEventName !== 'schedule') {
+          // Do not return actor for scheduled runs. In this case, the actor
+          // is the last person to modify the gha yaml definition. See
+          // https://github.community/t/who-will-be-the-github-actor-when-a-workflow-runs-on-a-schedule/17369
+          return attributes['workflow.github.actor'];
+        }
+      } catch (err) {
+        return 'unknown';
+      }
+    } else {
+      const userTag = runTags[Utils.userTag];
+      if (userTag) {
+        const userTag = runTags[Utils.userTag];
+        return userTag.value;
+      }
+      return runInfo.user_id;
+    }
+  }
+
+  static renderVersionStaticGH(shortVersion, runUuid) {
+    const attributes = StaticMlflowService.getRunRawData(runUuid).attributes;
+
+    const gitSha = attributes["workflow.github.sha"];
+    const githubRepo = attributes["workflow.github.repository"];
+
+    if (!!gitSha && !!githubRepo) {
+      const linkString = shortVersion ? gitSha.substring(0, 6) : gitSha;
+      const url = `https://github.com/${githubRepo}/commit/${gitSha}`;
+      return <a href={url} target='_top' title='git commit sha'>{linkString}</a>;
+    }
+  }
+
+  static renderVersion(tags, shortVersion = true, runUuid) {
+    if (process.env.HOST_STATIC_SITE) {
+      return Utils.renderVersionStaticGH(shortVersion, runUuid);
+    }
     const sourceVersion = Utils.getSourceVersion(tags);
     const sourceName = Utils.getSourceName(tags);
     const sourceType = Utils.getSourceType(tags);

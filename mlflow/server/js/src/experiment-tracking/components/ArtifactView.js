@@ -92,7 +92,7 @@ export class ArtifactViewImpl extends Component {
               description='Label to display the full path of where the artifact of the experiment runs is located'
             />
           </label>{' '}
-          <Text className='artifact-info-text' ellipsis copyable>
+          <Text className='artifact-info-text' copyable>
             {activeNodeRealPath}
           </Text>
         </div>
@@ -193,7 +193,8 @@ export class ArtifactViewImpl extends Component {
     if (artifactNode.fileInfo) {
       const { path } = artifactNode.fileInfo;
       id = path;
-      name = getBasename(path);
+      // list artifacts: automatically expand all directories for static website
+      name = process.env.HOST_STATIC_SITE ? artifactNode.fileInfo.path : getBasename(path);
     }
 
     const toggleState = this.state.toggledNodeIds[id];
@@ -265,30 +266,49 @@ export class ArtifactViewImpl extends Component {
   }
 
   componentDidMount() {
-    if (this.props.initialSelectedArtifactPath) {
-      const artifactPathParts = this.props.initialSelectedArtifactPath.split('/');
-      if (artifactPathParts) {
-        try {
-          // Check if valid artifactId was supplied in URL. If not, don't select
-          // or expand anything.
-          ArtifactUtils.findChild(this.props.artifactNode, this.props.initialSelectedArtifactPath);
-        } catch (err) {
-          console.error(err);
-          return;
-        }
+    if (process.env.HOST_STATIC_SITE) {
+      // Note that here the initially selected artifact depends on what files have
+      // been logged.
+      //
+      // This is only available after an API call, and may not be available when
+      // `initialSelectedArtifactPath` is set.
+      if ("notebook.html" in this.props.artifactNode.children) {
+        this.setSelectedArtifactPath("notebook.html")
+      } else if ("run-time-metadata.json" in this.props.artifactNode.children) {
+        this.setSelectedArtifactPath("run-time-metadata.json")
       }
-      let pathSoFar = '';
-      const toggledArtifactState = {
-        activeNodeId: this.props.initialSelectedArtifactPath,
-        toggledNodeIds: {},
-      };
-      artifactPathParts.forEach((part) => {
-        pathSoFar += part;
-        toggledArtifactState['toggledNodeIds'][pathSoFar] = true;
-        pathSoFar += '/';
-      });
-      this.setArtifactState(toggledArtifactState);
+    } else {
+      // set path provided in url
+      if (this.props.initialSelectedArtifactPath) {
+        this.setSelectedArtifactPath(this.props.initialSelectedArtifactPath)
+      }
     }
+  }
+
+  setSelectedArtifactPath(artifactPath) {
+    const artifactPathParts = artifactPath.split('/');
+    if (artifactPathParts) {
+      try {
+        // Check if valid artifactId was supplied in URL. If not, don't select
+        // or expand anything.
+        ArtifactUtils.findChild(this.props.artifactNode, artifactPath);
+      } catch (err) {
+        console.error(err);
+        return;
+      }
+    }
+
+    let pathSoFar = '';
+    const toggledArtifactState = {
+      activeNodeId: artifactPath,
+      toggledNodeIds: {},
+    };
+    artifactPathParts.forEach((part) => {
+      pathSoFar += part;
+      toggledArtifactState['toggledNodeIds'][pathSoFar] = true;
+      pathSoFar += '/';
+    });
+    this.setArtifactState(toggledArtifactState);
   }
 
   setArtifactState(artifactState) {
@@ -431,7 +451,6 @@ const TREEBEARD_STYLE = {
       backgroundColor: '#FAFAFA',
       fontSize: '14px',
       maxWidth: '500px',
-      height: '673px',
       overflow: 'scroll',
     },
     node: {

@@ -161,6 +161,11 @@ const mapStateToProps = (state, ownProps) => {
       selectedPath = _.first(loggedModelPaths);
     }
   }
+
+  if (process.env.HOST_STATIC_SITE) {
+    selectedPath = undefined;
+  }
+
   return { artifactRootUri, apis, initialSelectedArtifactPath: selectedPath };
 };
 

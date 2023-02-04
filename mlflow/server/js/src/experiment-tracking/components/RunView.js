@@ -19,6 +19,9 @@ import { CollapsibleSection } from '../../common/components/CollapsibleSection';
 import { EditableNote } from '../../common/components/EditableNote';
 import { setTagApi, deleteTagApi } from '../actions';
 import { PageHeader, OverflowMenu } from '../../shared/building_blocks/PageHeader';
+import { DataBacklinkFooter } from '../static-data/UIConstants.js';
+import RemotelyFetchedMermaidView from '../../experiment-tracking/components/artifact-view-components/RemotelyFetchedMermaidView';
+import { capitalizeFirstChar } from '../../common/utils/StringUtils'
 
 export class RunViewImpl extends Component {
   static propTypes = {
@@ -119,6 +122,10 @@ export class RunViewImpl extends Component {
   getRunCommand() {
     const { tags, params } = this.props;
     let runCommand = null;
+    if (process.env.HOST_STATIC_SITE) {
+      return runCommand;
+    }
+
     const sourceName = Utils.getSourceName(tags);
     const sourceVersion = Utils.getSourceVersion(tags);
     const entryPointName = Utils.getEntryPointName(tags);
@@ -218,20 +225,22 @@ export class RunViewImpl extends Component {
           breadcrumbs={breadcrumbs}
           feedbackForm={feedbackForm}
         >
-          <OverflowMenu
-            menu={[
-              {
-                id: 'overflow-rename-button',
-                onClick: this.handleRenameRunClick,
-                itemName: (
-                  <FormattedMessage
-                    defaultMessage='Rename'
-                    description='Menu item to rename an experiment run'
-                  />
-                ),
-              },
-            ]}
-          />
+          {process.env.HOST_STATIC_SITE ? null :
+            <OverflowMenu
+              menu={[
+                {
+                  id: 'overflow-rename-button',
+                  onClick: this.handleRenameRunClick,
+                  itemName: (
+                    <FormattedMessage
+                      defaultMessage='Rename'
+                      description='Menu item to rename an experiment run'
+                    />
+                  ),
+                },
+              ]}
+            />
+          }
         </PageHeader>
         <div className='header-container'>
           <RenameRunModal
@@ -252,6 +261,7 @@ export class RunViewImpl extends Component {
           >
             {startTime}
           </Descriptions.Item>
+          {/* --- task name + type */}
           <Descriptions.Item
             label={this.props.intl.formatMessage({
               defaultMessage: 'Source',
@@ -263,6 +273,17 @@ export class RunViewImpl extends Component {
               {Utils.renderSource(tags, queryParams, runUuid)}
             </div>
           </Descriptions.Item>
+          {tags['mlflow.runName'] !== undefined ? (
+            <Descriptions.Item
+              label={this.props.intl.formatMessage({
+                defaultMessage: 'Task type',
+                description: 'Specify if this is a Workflow (of multiple tasks), a Python task or a Jupytext notebook task',
+              })}
+              >
+                {capitalizeFirstChar(tags['mlflow.runName'].value)}
+            </Descriptions.Item>
+          ) : null}
+          {/* --- */}
           {Utils.getSourceVersion(tags) ? (
             <Descriptions.Item
               label={this.props.intl.formatMessage({
@@ -270,7 +291,7 @@ export class RunViewImpl extends Component {
                 description: 'Label for displaying the tag or the commit hash of the git commit',
               })}
             >
-              {Utils.renderVersion(tags, false)}
+              {Utils.renderVersion(tags, false, runUuid)}
             </Descriptions.Item>
           ) : null}
           {Utils.getSourceType(tags) === 'PROJECT' ? (
@@ -377,43 +398,89 @@ export class RunViewImpl extends Component {
               <textarea className='run-command text-area' readOnly value={runCommand} />
             </CollapsibleSection>
           ) : null}
-          <CollapsibleSection
-            title={
-              <span>
-                <FormattedMessage
-                  defaultMessage='Description'
-                  description='Label for the notes editable content for the experiment run'
-                />
-                {!showNoteEditor && (
-                  <>
-                    {' '}
-                    <Button
-                      type='link'
-                      onClick={this.startEditingDescription}
-                      data-test-id='edit-description-button'
-                    >
-                      <FormattedMessage
-                        defaultMessage='Edit'
-                        // eslint-disable-next-line max-len
-                        description='Text for the edit button next to the description section title on the run view'
-                      />
-                    </Button>
-                  </>
-                )}
-              </span>
-            }
-            forceOpen={showNoteEditor}
-            defaultCollapsed={!noteContent}
-            onChange={this.handleCollapseChange('notes')}
-            data-test-id='run-notes-section'
-          >
-            <EditableNote
-              defaultMarkdown={noteContent}
-              onSubmit={this.handleSubmitEditNote}
-              onCancel={this.handleCancelEditNote}
-              showEditor={showNoteEditor}
-            />
-          </CollapsibleSection>
+
+          {process.env.HOST_STATIC_SITE ? null :
+            <CollapsibleSection
+              title={
+                <span>
+                  <FormattedMessage
+                    defaultMessage='Description'
+                    description='Label for the notes editable content for the experiment run'
+                  />
+                  {!process.env.HOST_STATIC_SITE && !showNoteEditor && (
+                    <>
+                      {' '}
+                      <Button
+                        type='link'
+                        onClick={this.startEditingDescription}
+                        data-test-id='edit-description-button'
+                      >
+                        <FormattedMessage
+                          defaultMessage='Edit'
+                          // eslint-disable-next-line max-len
+                          description='Text for the edit button next to the description section title on the run view'
+                        />
+                      </Button>
+                    </>
+                  )}
+                </span>
+              }
+              forceOpen={showNoteEditor}
+              defaultCollapsed={!noteContent}
+              onChange={this.handleCollapseChange('notes')}
+              data-test-id='run-notes-section'
+            >
+              <EditableNote
+                defaultMarkdown={noteContent}
+                onSubmit={this.handleSubmitEditNote}
+                onCancel={this.handleCancelEditNote}
+                showEditor={showNoteEditor}
+              />
+            </CollapsibleSection>
+          }
+
+          {(process.env.HOST_STATIC_SITE && this.props.runName === 'workflow') ?
+            <CollapsibleSection
+              title={
+                <span>
+                  <FormattedMessage
+                    defaultMessage='Task dependency graph'
+                    description='Mermaid rendered graph of task dependencies for this workflow'
+                  />
+                </span>
+              }
+              defaultCollapsed={false}
+              onChange={this.handleCollapseChange('task-dependency-dag')}
+              data-test-id='run-task-dependency-dag-section'
+            >
+              <RemotelyFetchedMermaidView
+                artifactRootUri={run.getArtifactUri()}
+                path="dag.mmd"
+              />
+            </CollapsibleSection>
+          : null}
+
+          {(process.env.HOST_STATIC_SITE && this.props.runName === 'workflow') ?
+            <CollapsibleSection
+              title={
+                <span>
+                  <FormattedMessage
+                    defaultMessage='Gantt diagram'
+                    description='Mermaid rendered Gantt diagram for task runtimes'
+                  />
+                </span>
+              }
+              defaultCollapsed={false}
+              onChange={this.handleCollapseChange('task-gantt-runtimes-diagram')}
+              data-test-id='run-task-gantt-section'
+            >
+              <RemotelyFetchedMermaidView
+                artifactRootUri={run.getArtifactUri()}
+                path="gantt.mmd"
+              />
+            </CollapsibleSection>
+          : null}
+
           <CollapsibleSection
             defaultCollapsed
             title={this.renderSectionTitle(
@@ -529,6 +596,7 @@ export class RunViewImpl extends Component {
             <ArtifactPage runUuid={runUuid} modelVersions={modelVersions} runTags={tags} />
           </CollapsibleSection>
         </div>
+        {DataBacklinkFooter}
       </div>
     );
   }

@@ -19,6 +19,7 @@ class ShowArtifactImageView extends Component {
   static propTypes = {
     runUuid: PropTypes.string.isRequired,
     path: PropTypes.string.isRequired,
+    artifactRootUri: PropTypes.string.isRequired,
   };
 
   componentDidMount = () => {
@@ -42,8 +43,8 @@ class ShowArtifactImageView extends Component {
   };
 
   getSrc = () => {
-    const { path, runUuid } = this.props;
-    return getSrc(path, runUuid);
+    const { path, runUuid, artifactRootUri} = this.props;
+    return getSrc(path, runUuid, artifactRootUri);
   };
 
   isGif = () => {
